@@ -1,7 +1,7 @@
 {
-  "name": "name",
+  "name": "battleship",
   "version": "1.0.0",
-  "description": "description",
+  "description": "Battleship Game",
   "lint-staged": {
     "src/**/*.js": [
       "eslint --fix",
@@ -23,17 +23,13 @@
     "prepare": "husky"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PRINCE-OBOT/Restaurant-Page.git"
+    "type": "git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/PRINCE-OBOT/Restaurant-Page/issues"
-  },
-  "homepage": "https://github.com/PRINCE-OBOT/Restaurant-Page#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.29.0",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "eslint": "^8.57.1",
@@ -50,8 +46,5 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
     "webpack-merge": "^6.0.1"
-  },
-  "dependencies": {
-    "date-fns": "^4.1.0"
   }
 }
