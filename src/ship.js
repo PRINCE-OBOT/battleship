@@ -9,7 +9,7 @@ export default function Ship(length, coordinate) {
   const getHit = () => hitCount;
 
   const isSunk = () => {
-    return hitCount >= length;
+    return hitCount === length;
   };
 
   const len = () => length;

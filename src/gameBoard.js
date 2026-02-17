@@ -102,7 +102,6 @@ export default function GameBoard() {
 
   const receiveAttack = (coordinate) => {
     const indexOfCoordinate = getIndexOfCoordinate(coordinate);
-
     const cell = board[indexOfCoordinate];
 
     if (!cell.isCellHit()) {
@@ -114,7 +113,12 @@ export default function GameBoard() {
     }
   };
 
-  return { setShip, getShip, switchShipAxis, receiveAttack };
+  const isAllShipSunk = () => {
+    const cellWithShip = board.filter((cell) => cell.getShip());
+    return cellWithShip.every((cell) => cell.getShip().isSunk());
+  };
+
+  return { setShip, getShip, switchShipAxis, receiveAttack, isAllShipSunk };
 }
 
 // write a function that tell that a ship is in a cordinate
