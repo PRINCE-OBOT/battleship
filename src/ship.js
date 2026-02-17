@@ -1,4 +1,4 @@
-export default function Ship(length) {
+export default function Ship(length, coordinate) {
   let hitCount = 0;
   let axis = 'xAxis';
 
@@ -20,5 +20,7 @@ export default function Ship(length) {
 
   const getAxis = () => axis;
 
-  return { hit, getHit, isSunk, len, getAxis, switchAxis };
+  const getCoordinate = () => coordinate;
+
+  return { hit, getHit, isSunk, len, getAxis, switchAxis, getCoordinate };
 }

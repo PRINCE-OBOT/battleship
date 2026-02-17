@@ -1,4 +1,4 @@
-function Cell(coord) {
+function Cell(coordinate) {
   let shipInCell = null;
 
   const setShip = (ship) => {
@@ -7,13 +7,15 @@ function Cell(coord) {
 
   const getShip = () => shipInCell;
 
-  const shipCoordinate = () => coord;
-
-  const resetCell = () => {
+  const removeShip = () => {
+    const ship = shipInCell;
     shipInCell = null;
+    return ship;
   };
 
-  return { setShip, getShip, shipCoordinate, resetCell };
+  const getCoordinate = () => coordinate;
+
+  return { setShip, getShip, removeShip, getCoordinate };
 }
 
 export default function GameBoard() {
@@ -28,7 +30,7 @@ export default function GameBoard() {
   }
 
   const getIndexOfCoordinate = (coordinate) =>
-    board.findIndex((cell) => cell.shipCoordinate() === coordinate);
+    board.findIndex((cell) => cell.getCoordinate() === coordinate);
 
   const setShip = (ship, coordinate) => {
     let indexOfCoordinate = getIndexOfCoordinate(coordinate);
@@ -46,28 +48,47 @@ export default function GameBoard() {
   const switchShipAxis = (coordinate) => {
     const indexOfCoordinate = getIndexOfCoordinate(coordinate);
     const ship = board[indexOfCoordinate].getShip();
+    const shipLen = ship.len();
     ship.switchAxis();
+    const axis = ship.getAxis();
 
     let count = 0;
+    let shipInNewCell = false;
     let oldIndex = indexOfCoordinate;
     let newIndex = indexOfCoordinate;
 
-    while (count < ship.len()) {
-      const oldCell = board[oldIndex];
+    while (count < shipLen) {
       const newCell = board[newIndex];
-      const ship = oldCell.getShip();
-      newCell.setShip(ship);
 
-      if (oldCell !== newCell) oldCell.resetCell();
-
+      if (count !== 0) {
+        if (newCell.getShip()) {
+          shipInNewCell = true;
+          break;
+        }
+      }
       count++;
+      axis === 'xAxis' ? newIndex++ : (newIndex += 10);
+    }
 
-      if (ship.getAxis() === 'xAxis') {
-        oldIndex += 10;
-        newIndex++;
-      } else {
-        oldIndex++;
-        newIndex += 10;
+    if (!shipInNewCell) {
+      count = 0;
+      newIndex = indexOfCoordinate;
+
+      while (count < shipLen) {
+        const oldCell = board[oldIndex];
+        const newCell = board[newIndex];
+        const removedShip = oldCell.removeShip();
+        newCell.setShip(removedShip);
+
+        count++;
+
+        if (removedShip.getAxis() === 'xAxis') {
+          oldIndex += 10;
+          newIndex++;
+        } else {
+          oldIndex++;
+          newIndex += 10;
+        }
       }
     }
   };
