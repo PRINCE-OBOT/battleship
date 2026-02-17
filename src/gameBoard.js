@@ -1,5 +1,6 @@
 function Cell(coordinate) {
   let shipInCell = null;
+  let hit = false;
 
   const setShip = (ship) => {
     shipInCell = ship;
@@ -13,9 +14,15 @@ function Cell(coordinate) {
     return ship;
   };
 
+  const hitCell = () => {
+    hit = true;
+  };
+
+  const isCellHit = () => hit;
+
   const getCoordinate = () => coordinate;
 
-  return { setShip, getShip, removeShip, getCoordinate };
+  return { setShip, getShip, removeShip, hitCell, isCellHit, getCoordinate };
 }
 
 export default function GameBoard() {
@@ -93,7 +100,21 @@ export default function GameBoard() {
     }
   };
 
-  return { setShip, getShip, switchShipAxis };
+  const receiveAttack = (coordinate) => {
+    const indexOfCoordinate = getIndexOfCoordinate(coordinate);
+
+    const cell = board[indexOfCoordinate];
+
+    if (!cell.isCellHit()) {
+      const ship = cell.getShip();
+      if (ship) {
+        ship.hit();
+      }
+      cell.hitCell();
+    }
+  };
+
+  return { setShip, getShip, switchShipAxis, receiveAttack };
 }
 
 // write a function that tell that a ship is in a cordinate
