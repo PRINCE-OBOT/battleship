@@ -1,5 +1,6 @@
 export default function Ship(length) {
   let hitCount = 0;
+  let axis = 'xAxis';
 
   const hit = () => {
     hitCount++;
@@ -11,5 +12,13 @@ export default function Ship(length) {
     return hitCount >= length;
   };
 
-  return { hit, getHit, isSunk };
+  const len = () => length;
+
+  const switchAxis = () => {
+    axis = axis === 'xAxis' ? 'yAxis' : 'xAxis';
+  };
+
+  const getAxis = () => axis;
+
+  return { hit, getHit, isSunk, len, getAxis, switchAxis };
 }

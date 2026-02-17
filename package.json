@@ -20,7 +20,8 @@
     "prettier-global": "prettier --write .",
     "lint": "eslint ./src/",
     "lint-fix": "eslint --fix ./src/",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "jest"
   },
   "repository": {
     "type": "git"
