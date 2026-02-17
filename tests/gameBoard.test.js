@@ -25,14 +25,24 @@ describe('Game Board', () => {
     expect(gameBoard.getShip('c2')).toBeTruthy();
   });
 
-  test.only('Increment hit when ship is hitting', () => {
+  test('Increment hit when ship is hitting', () => {
     const gameBoard = GameBoard();
-    const ship = Ship(3, 'c0')
+    const ship = Ship(3, 'c0');
     gameBoard.setShip(ship, 'c0');
 
     gameBoard.receiveAttack('c0');
     gameBoard.receiveAttack('c4');
 
     expect(ship.getHit()).toBe(1);
+  });
+
+  test.only('should be true when all ship is sunk', () => {
+    const gameBoard = GameBoard();
+    const ship = Ship(1, 'c0');
+    gameBoard.setShip(ship, 'c0');
+
+    gameBoard.receiveAttack('c0');
+
+    expect(gameBoard.isAllShipSunk()).toBeTruthy();
   });
 });
