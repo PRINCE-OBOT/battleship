@@ -1,4 +1,5 @@
 import GameBoard from '../src/gameBoard';
+import Player from '../src/player';
 import Ship from '../src/ship';
 
 describe('Game Board', () => {
@@ -36,7 +37,7 @@ describe('Game Board', () => {
     expect(ship.getHit()).toBe(1);
   });
 
-  test.only('should be true when all ship is sunk', () => {
+  test('should be true when all ship is sunk', () => {
     const gameBoard = GameBoard();
     const ship = Ship(1, 'c0');
     gameBoard.setShip(ship, 'c0');
@@ -44,5 +45,12 @@ describe('Game Board', () => {
     gameBoard.receiveAttack('c0');
 
     expect(gameBoard.isAllShipSunk()).toBeTruthy();
+  });
+
+  test.only('Prevent collision of ship when setting new ship', () => {
+    const player = Player();
+    player.setShip(Ship(1, 'j2'), 'j2', 'human');
+    player.setShip(Ship(3, 'j0'), 'j0', 'human'); // will not be set, length 3 start at j0 will collide at j2 - ship already occupy j2
+    expect(player.getPlayerBoard('human').getShip('j0')).toBeFalsy();
   });
 });

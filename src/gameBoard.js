@@ -41,12 +41,32 @@ export default function GameBoard() {
 
   const setShip = (ship, coordinate) => {
     let indexOfCoordinate = getIndexOfCoordinate(coordinate);
-    let count = 0;
+    const shipLen = ship.len();
 
-    while (count < ship.len()) {
-      board[indexOfCoordinate].setShip(ship);
+    let count = 0;
+    let index = indexOfCoordinate;
+    let isShipInCell = false;
+
+    while (count < shipLen) {
+      const cell = board[index];
+
+      if (cell.getShip()) {
+        isShipInCell = true;
+        break;
+      }
       count++;
-      indexOfCoordinate++;
+      index++;
+    }
+
+    if (!isShipInCell) {
+      count = 0;
+      index = indexOfCoordinate;
+
+      while (count < shipLen) {
+        board[index].setShip(ship);
+        count++;
+        index++;
+      }
     }
   };
 
@@ -60,7 +80,7 @@ export default function GameBoard() {
     const axis = ship.getAxis();
 
     let count = 0;
-    let shipInNewCell = false;
+    let isShipInNewCell = false;
     let oldIndex = indexOfCoordinate;
     let newIndex = indexOfCoordinate;
 
@@ -69,7 +89,7 @@ export default function GameBoard() {
 
       if (count !== 0) {
         if (newCell.getShip()) {
-          shipInNewCell = true;
+          isShipInNewCell = true;
           break;
         }
       }
@@ -77,7 +97,7 @@ export default function GameBoard() {
       axis === 'xAxis' ? newIndex++ : (newIndex += 10);
     }
 
-    if (!shipInNewCell) {
+    if (!isShipInNewCell) {
       count = 0;
       newIndex = indexOfCoordinate;
 
