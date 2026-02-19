@@ -1,3 +1,5 @@
+import Ship from './ship';
+
 function Cell(coordinate) {
   let shipInCell = null;
   let hit = false;
@@ -25,10 +27,11 @@ function Cell(coordinate) {
   return { setShip, getShip, removeShip, hitCell, isCellHit, getCoordinate };
 }
 
-export default function GameBoard() {
+export default function GameBoard(gameBoardID) {
   const board = [];
   const yAxis = ['j', 'i', 'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
   const xAxis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const cellInOrderOfHit = [];
 
   for (let i = 0; i < yAxis.length; i++) {
     for (let j = 0; j < xAxis.length; j++) {
@@ -39,9 +42,13 @@ export default function GameBoard() {
   const getIndexOfCoordinate = (coordinate) =>
     board.findIndex((cell) => cell.getCoordinate() === coordinate);
 
-  const setShip = (ship, coordinate) => {
-    let indexOfCoordinate = getIndexOfCoordinate(coordinate);
+  const setShip = (shipTemplate, coordinate) => {
+    if (shipTemplate.ID !== gameBoardID) return;
+
+    const ship = Ship(shipTemplate.len, coordinate);
     const shipLen = ship.len();
+
+    let indexOfCoordinate = getIndexOfCoordinate(coordinate);
 
     let count = 0;
     let index = indexOfCoordinate;
@@ -125,12 +132,15 @@ export default function GameBoard() {
     const cell = board[indexOfCoordinate];
 
     if (!cell.isCellHit()) {
+      cellInOrderOfHit.push(coordinate);
       const ship = cell.getShip();
       if (ship) {
         ship.hit();
+        return true;
       }
       cell.hitCell();
     }
+    return false;
   };
 
   const isAllShipSunk = () => {
@@ -138,11 +148,24 @@ export default function GameBoard() {
     return cellWithShip.every((cell) => cell.getShip().isSunk());
   };
 
-  return { setShip, getShip, switchShipAxis, receiveAttack, isAllShipSunk };
-}
+  const getAllCoordinate = () => board.map((cell) => cell.getCoordinate());
 
-// write a function that tell that a ship is in a cordinate
-// the gameboard to hit the cordinate checking the following condition
-// if the cordinate has not been hit before
-// if a ship is in that cordinate increment the hit
-// alway mark the cordinate as hit
+  const getBoard = () => board;
+
+  const getCellInOrderOfHit = () => cellInOrderOfHit;
+
+  const getGameBoardID = () => gameBoardID;
+
+  return {
+    setShip,
+    getShip,
+    switchShipAxis,
+    receiveAttack,
+    isAllShipSunk,
+    getAllCoordinate,
+    getBoard,
+    getIndexOfCoordinate,
+    getCellInOrderOfHit,
+    getGameBoardID,
+  };
+}

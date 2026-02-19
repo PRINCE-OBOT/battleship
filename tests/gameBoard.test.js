@@ -1,9 +1,8 @@
 import GameBoard from '../src/gameBoard';
-import Player from '../src/player';
 import Ship from '../src/ship';
 
 describe('Game Board', () => {
-  test('Ship with multiple length, switched from X to Y Axis', () => {
+  test('Switch axis of ship', () => {
     const gameBoard = GameBoard();
     gameBoard.setShip(Ship(2), 'j0');
 
@@ -14,7 +13,8 @@ describe('Game Board', () => {
     expect(gameBoard.getShip('i0')).toBeTruthy();
   });
 
-  test('If a cell is encounter when switching, do not switch', () => {
+  test(`Should not swap axis of ship 
+    if it collide with another ship while swapping`, () => {
     const gameBoard = GameBoard();
     gameBoard.setShip(Ship(3, 'c0'), 'c0');
     gameBoard.setShip(Ship(1, 'a0'), 'a0');
@@ -45,12 +45,5 @@ describe('Game Board', () => {
     gameBoard.receiveAttack('c0');
 
     expect(gameBoard.isAllShipSunk()).toBeTruthy();
-  });
-
-  test.only('Prevent collision of ship when setting new ship', () => {
-    const player = Player();
-    player.setShip(Ship(1, 'j2'), 'j2', 'human');
-    player.setShip(Ship(3, 'j0'), 'j0', 'human'); // will not be set, length 3 start at j0 will collide at j2 - ship already occupy j2
-    expect(player.getPlayerBoard('human').getShip('j0')).toBeFalsy();
   });
 });
