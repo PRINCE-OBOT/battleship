@@ -1,26 +1,32 @@
+import GameBoard from '../src/gameBoard';
 import Player from '../src/player';
-import Ship from '../src/ship';
 
-describe('Player', () => {
+describe('Players', () => {
+  const playerOne = {
+    name: 'playerOneName',
+    board: GameBoard(crypto.randomUUID()),
+  };
+
   test('Prevent collision of ship when setting new ship', () => {
-    const player = Player();
-    const playerOneBoard = player.getBoardToSetShip(0);
-    const playerOneBoardID = playerOneBoard.getGameBoardID();
-    player.setShip({ ID: playerOneBoardID, len: 1 }, 'j2', 0);
+    const id = playerOne.board.getID();
+    playerOne.board.setShip({ id, len: 1 }, 'j2');
     // ship will not be set,
     // length 3 start at j0 and end at j2, will collide at j2
     // ship already occupy j2
-    player.setShip({ ID: playerOneBoardID, len: 3 }, 'j0', 0);
+    playerOne.board.setShip({ id, len: 3 }, 'j0');
 
-    expect(playerOneBoard.getShip('j0')).toBeFalsy();
+    expect(playerOne.board.getShip('j0')).toBeFalsy();
   });
+});
 
-  test('should get all valid adjacent coordinate', () => {
-    const player = Player();
-    const playerOneBoard = player.getBoardToSetShip(0);
-    const playerOneBoardID = playerOneBoard.getGameBoardID();
-    player.setShip({ ID: playerOneBoardID, len: 1 }, 'e4', 0);
+describe('Computer Adjacent Coordinate', () => {
+  const playerOne = {
+    name: 'playerOneName',
+    board: GameBoard(crypto.randomUUID()),
+  };
+  const player = Player(playerOne);
 
+  test('Should get all valid adjacent coordinate', () => {
     expect(player.getValidAdjacentCoordinate('e4')).toEqual([
       { indexOfCoordinate: 53 },
       { indexOfCoordinate: 44 },
@@ -29,37 +35,38 @@ describe('Player', () => {
     ]);
   });
 
-  test('should ignore top and right invalid direction', () => {
-    const player = Player();
-    player.setShip(Ship(1, 'j9'), 'j9', 'Player 1');
-
-    expect(player.play('j9', 'Player 1')).toEqual([
+  test('Should ignore top and right invalid direction', () => {
+    expect(player.getValidAdjacentCoordinate('j9')).toEqual([
       { indexOfCoordinate: 8 },
       { indexOfCoordinate: 19 },
     ]);
   });
 
-  test('should ignore left and bottom invalid direction', () => {
-    const player = Player();
-    player.setShip(Ship(1, 'a0'), 'a0', 'Player 1');
-
-    expect(player.play('a0', 'Player 1')).toEqual([
+  test('Should ignore left and bottom invalid direction', () => {
+    expect(player.getValidAdjacentCoordinate('a0')).toEqual([
       { indexOfCoordinate: 80 },
       { indexOfCoordinate: 91 },
     ]);
   });
+});
 
-  test.only('Should try adjacent slot after getting a hit', () => {
-    const player = Player();
-    const playerOneBoard = player.getBoardToSetShip(0);
-    const playerOneBoardID = playerOneBoard.getGameBoardID();
-    
-    player.setShip({ ID: playerOneBoardID, len: 2 }, 'i4', 0);
+describe('Computer Try Adjacent Slop', () => {
+  test('Should try adjacent slot after getting a hit', () => {
+    const playerOne = {
+      name: 'playerOneName',
+      board: GameBoard(crypto.randomUUID()),
+    };
 
-    playerOneBoard.switchShipAxis('i4');
-    
-    player.play('i4', '');
+    const playerOneBoardID = playerOne.board.getID();
 
-    expect(playerOneBoard.getCellInOrderOfHit()).toEqual(['i4', 'h4', 'g4']);
+    const player = Player(playerOne);
+
+    playerOne.board.setShip({ id: playerOneBoardID, len: 2 }, 'i4');
+
+    playerOne.board.switchShipAxis('i4');
+
+    player.play('i4', '', 'predictableIndex');
+
+    expect(playerOne.board.getCellInOrderOfHit()).toEqual(['i4', 'h4', 'g4']);
   });
 });

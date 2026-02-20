@@ -27,7 +27,7 @@ function Cell(coordinate) {
   return { setShip, getShip, removeShip, hitCell, isCellHit, getCoordinate };
 }
 
-export default function GameBoard(gameBoardID) {
+export default function GameBoard(id) {
   const board = [];
   const yAxis = ['j', 'i', 'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
   const xAxis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -43,7 +43,7 @@ export default function GameBoard(gameBoardID) {
     board.findIndex((cell) => cell.getCoordinate() === coordinate);
 
   const setShip = (shipTemplate, coordinate) => {
-    if (shipTemplate.ID !== gameBoardID) return;
+    if (shipTemplate.id !== id) return;
 
     const ship = Ship(shipTemplate.len, coordinate);
     const shipLen = ship.len();
@@ -154,7 +154,7 @@ export default function GameBoard(gameBoardID) {
 
   const getCellInOrderOfHit = () => cellInOrderOfHit;
 
-  const getGameBoardID = () => gameBoardID;
+  const getID = () => id;
 
   return {
     setShip,
@@ -166,6 +166,6 @@ export default function GameBoard(gameBoardID) {
     getBoard,
     getIndexOfCoordinate,
     getCellInOrderOfHit,
-    getGameBoardID,
+    getID,
   };
 }

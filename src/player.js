@@ -1,102 +1,84 @@
 import GameBoard from './gameBoard';
 
-const shipSample = {};
-
-export default function Player(playerOneName = 'Player 1', playTwoName) {
-  const playerOneID = crypto.randomUUID();
-  // continue form creating a ship sample that will be use to place ship
-
-  const computer = {
-    name: 'Dolly',
-    board: GameBoard(),
-  };
-
-  const playerOne = {
-    name: playerOneName,
-    board: GameBoard(crypto.randomUUID()),
-  };
-
-  const playerTwo = {
-    name: playTwoName,
-    board: GameBoard(crypto.randomUUID()),
-  };
-
+export default function Player(
+  playerOne,
+  playerTwo = {
+    name: 'Computer',
+    board: GameBoard('computer'),
+  },
+) {
   const stack = [];
-  const boardToSetShip = [playerOne.board];
-  const allCoordinate = computer.board.getAllCoordinate();
+  const allCoordinate = playerTwo.board.getAllCoordinate();
 
-  let playerName = playerOne.name;
-  let boardToAttack = playerTwo.board;
+  const playerOneID = playerOne.board.getID();
+  const playerTwoID = playerTwo.board.getID();
 
-  if (playerTwo.name !== undefined) boardToSetShip.push(playerTwo.board);
+  const playerOneGridBoard = playerOne.board.getBoard();
+  const playerTwoGridBoard = playerTwo.board.getBoard();
 
-  const switchPlayer = () => {
-    playerName = playerName === playerOne.name ? playerTwo.name : playerOne.name;
+  let playerID = playerOneID;
+  let boardToAttack = playerTwoGridBoard;
+
+  const switchTurn = () => {
+    playerID = playerID === playerOneID ? playerTwoID : playerOneID;
   };
 
   const switchBoard = () => {
-    boardToAttack = boardToAttack === playerTwo.board ? playerOne.board : playerTwo.board;
+    boardToAttack = boardToAttack === playerTwoGridBoard ? playerOneGridBoard : playerTwoGridBoard;
   };
 
-  const getCurrentPlayer = () => playerName;
+  const getCurrentPlayerID = () => playerID;
 
   const getCurrentBoardToAttack = () => boardToAttack;
-
-  const setShip = (shipTemplate, coordinate, position) => {
-    if (position === 1 && playerTwo.name === undefined) return;
-    boardToSetShip[position].setShip(shipTemplate, coordinate);
-  };
 
   const getValidAdjacentCoordinate = (coordinate) => {
     const coordinateIndex = Number.isInteger(coordinate)
       ? coordinate
-      : computer.board.getIndexOfCoordinate(coordinate);
+      : playerTwo.board.getIndexOfCoordinate(coordinate);
 
     const leftCoordinateIndex = coordinateIndex - 1;
     const topCoordinateIndex = coordinateIndex - 10;
     const rightCoordinateIndex = coordinateIndex + 1;
     const bottomCoordinateIndex = coordinateIndex + 10;
 
-    const computerBoard = computer.board.getBoard();
-
     return [
       {
         indexOfCoordinate: leftCoordinateIndex,
         isValid:
           leftCoordinateIndex >= 0 &&
-          +computerBoard[leftCoordinateIndex].getCoordinate()[1] <
-            +computerBoard[coordinateIndex].getCoordinate()[1],
+          +playerTwoGridBoard[leftCoordinateIndex].getCoordinate()[1] <
+            +playerTwoGridBoard[coordinateIndex].getCoordinate()[1],
       },
       { indexOfCoordinate: topCoordinateIndex, isValid: topCoordinateIndex >= 0 },
       {
         indexOfCoordinate: rightCoordinateIndex,
         isValid:
-          computerBoard[rightCoordinateIndex].getCoordinate()[0] ===
-          computerBoard[coordinateIndex].getCoordinate()[0],
+          playerTwoGridBoard[rightCoordinateIndex].getCoordinate()[0] ===
+          playerTwoGridBoard[coordinateIndex].getCoordinate()[0],
       },
       { indexOfCoordinate: bottomCoordinateIndex, isValid: bottomCoordinateIndex < 100 },
     ]
       .filter(
         (coordObj) =>
           coordObj.isValid &&
-          allCoordinate.includes(computerBoard[coordObj.indexOfCoordinate].getCoordinate()),
+          allCoordinate.includes(playerTwoGridBoard[coordObj.indexOfCoordinate].getCoordinate()),
       )
       .map((coordObj) => {
         return { indexOfCoordinate: coordObj.indexOfCoordinate };
       });
   };
 
-  const computerSendAttack = (coordinateIndex, coordinate, pattern) => {
+  const computerSendAttack = (coordinateIndex, coordinate, modeKey) => {
     let isShipHit = playerOne.board.receiveAttack(coordinate);
 
     if (isShipHit) {
       const validAdjacentCoordinate = getValidAdjacentCoordinate(coordinateIndex);
       if (validAdjacentCoordinate.length) stack.unshift(validAdjacentCoordinate);
-      computerTurn(false, pattern);
+      computerTurn(false, modeKey);
     }
   };
 
-  const computerTurn = (specificCoordinate, pattern = 'random') => {
+  const computerTurn = (specificCoordinate, modeKey = 'randomIndex') => {
     let coordinate = specificCoordinate;
     let coordinateIndex;
 
@@ -104,12 +86,12 @@ export default function Player(playerOneName = 'Player 1', playTwoName) {
       // try adjacent slot
       const arrOfCoordinateIndex = stack[0];
 
-      const indexPattern = {
-        predictable: arrOfCoordinateIndex.length - 1,
-        random: Math.floor(Math.random() * arrOfCoordinateIndex.length),
+      const mode = {
+        predictableIndex: arrOfCoordinateIndex.length - 1,
+        randomIndex: Math.floor(Math.random() * arrOfCoordinateIndex.length),
       };
 
-      const indexOfCoordinateObj = arrOfCoordinateIndex.splice(indexPattern[pattern], 1)[0];
+      const indexOfCoordinateObj = arrOfCoordinateIndex.splice(mode[modeKey], 1)[0];
 
       coordinateIndex = indexOfCoordinateObj.indexOfCoordinate;
       coordinate = playerOne.board.getBoard()[coordinateIndex].getCoordinate();
@@ -121,40 +103,34 @@ export default function Player(playerOneName = 'Player 1', playTwoName) {
       coordinateIndex = Math.floor(Math.random() * allCoordinate.length);
       coordinate = allCoordinate.splice(coordinateIndex, 1).toString();
     } else {
-      coordinateIndex = computer.board.getIndexOfCoordinate(specificCoordinate);
+      coordinateIndex = playerTwo.board.getIndexOfCoordinate(specificCoordinate);
     }
 
-    computerSendAttack(coordinateIndex, coordinate, pattern);
+    computerSendAttack(coordinateIndex, coordinate, modeKey);
   };
 
   const humanTurn = (coordinate) => {
-    computer.board.receiveAttack(coordinate);
+    playerTwo.board.receiveAttack(coordinate);
   };
 
-  const play = (coordinate, name, pattern) => {
-    if (playerTwo.name) {
-      if (getCurrentPlayer() !== name) return;
+  const isPlayerTurn = (id) => getCurrentPlayerID() === id;
+
+  const play = (coordinate, id, modeKey) => {
+    if (playerTwo.board.getID() === 'computer') {
+      humanTurn(coordinate);
+      computerTurn(coordinate, modeKey);
+    } else {
+      if (!isPlayerTurn(id)) return;
       getCurrentBoardToAttack().receiveAttack(coordinate);
 
-      switchPlayer();
+      switchTurn();
       switchBoard();
-    } else {
-      // humanTurn(coordinate);
-      computerTurn(coordinate, pattern);
     }
-  };
-
-  const getBoardToSetShip = (position) => {
-    if (position === 1 && playerTwo.name === undefined) return;
-    return boardToSetShip[position];
   };
 
   return {
     switchBoard,
     play,
-    setShip,
-    getCurrentBoardToAttack,
-    getBoardToSetShip,
     getValidAdjacentCoordinate,
   };
 }
