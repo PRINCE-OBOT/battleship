@@ -1,10 +1,11 @@
 import GameBoard from '../src/gameBoard';
-import Ship from '../src/ship';
 
 describe('Game Board', () => {
+  const id = crypto.randomUUID();
+
   test('Switch axis of ship', () => {
-    const gameBoard = GameBoard();
-    gameBoard.setShip(Ship(2), 'j0');
+    const gameBoard = GameBoard(id);
+    gameBoard.setShip({ id, len: 2 }, 'j0');
 
     gameBoard.switchShipAxis('j0');
 
@@ -15,9 +16,9 @@ describe('Game Board', () => {
 
   test(`Should not swap axis of ship 
     if it collide with another ship while swapping`, () => {
-    const gameBoard = GameBoard();
-    gameBoard.setShip(Ship(3, 'c0'), 'c0');
-    gameBoard.setShip(Ship(1, 'a0'), 'a0');
+    const gameBoard = GameBoard(id);
+    gameBoard.setShip({ id, len: 3 }, 'c0');
+    gameBoard.setShip({ id, len: 1 }, 'a0');
 
     gameBoard.switchShipAxis('c0');
 
@@ -27,20 +28,18 @@ describe('Game Board', () => {
   });
 
   test('Increment hit when ship is hitting', () => {
-    const gameBoard = GameBoard();
-    const ship = Ship(3, 'c0');
-    gameBoard.setShip(ship, 'c0');
+    const gameBoard = GameBoard(id);
+    gameBoard.setShip({ id, len: 3 }, 'c0');
 
     gameBoard.receiveAttack('c0');
     gameBoard.receiveAttack('c4');
 
-    expect(ship.getHit()).toBe(1);
+    expect(gameBoard.getShip('c0').getHit()).toBe(1);
   });
 
   test('should be true when all ship is sunk', () => {
     const gameBoard = GameBoard();
-    const ship = Ship(1, 'c0');
-    gameBoard.setShip(ship, 'c0');
+    gameBoard.setShip({ id, len: 1 }, 'c0');
 
     gameBoard.receiveAttack('c0');
 
