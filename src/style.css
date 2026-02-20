@@ -1,0 +1,197 @@
+/*  =========== Reset =========  */
+/* 1. Use a more-intuitive box-sizing model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default margin */
+* {
+  margin: 0;
+}
+
+body {
+  /* 3. Add accessible line-height */
+  line-height: 1.5;
+  /* 4. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 5. Improve media defaults */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 6. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 7. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 8. Improve line wrapping */
+p {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+/* font */
+@font-face {
+  font-family: Roboto;
+  src:
+    url(./fonts/Roboto-400.woff) format(woff),
+    url(./fonts/Pacifico-Regular.woff2) format(woff2);
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Pacifico;
+  src:
+    url(./fonts/Pacifico-Regular.woff) format(woff),
+    url(./fonts/Pacifico-Regular.woff2) format(woff2);
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+:root {
+  --pri-accent: rgb(217, 176, 13);
+  --sec-accent: rgb(195, 185, 40);
+  --white: rgb(255, 255, 255);
+  --black: rgb(0, 0, 0);
+  --error-transparent: rgba(249, 12, 12, 0.2);
+  --error: rgba(249, 12, 12);
+
+  --transparent-white-xsm: rgba(255, 255, 255, 0.8);
+  --transparent-white-sm: rgba(255, 255, 255, 0.5);
+  --transparent-white-lg: rgba(255, 255, 255, 0.2);
+
+  --transparent-black-xsm: rgba(0, 0, 0, 0.8);
+  --transparent-black-sm: rgba(0, 0, 0, 0.5);
+  --transparent-black-lg: rgba(0, 0, 0, 0.2);
+
+  --sz-xxxsm: 1px;
+  --sz-xxsm: 2px;
+  --sz-xsm: 5px;
+  --sz-sm: 10px;
+  --sz-lg: 20px;
+  --sz-xlg: 30px;
+  --sz-xxlg: 60px;
+
+  --bx-shadow: 0.5px 0.5px 5px var(--transparent-black-xsm);
+}
+
+body {
+  font-family: Roboto, arial;
+  font-size: clamp(var(--sz-sm), var(--sz-sm) + 0.5vw, var(--sz-sm) + var(--sz-xsm));
+}
+
+.container {
+  max-width: 700px;
+  padding: 0 var(--sz-lg);
+  margin: 0 auto 0;
+  min-height: 100vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--sz-lg);
+  align-items: center;
+}
+
+.boards-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-ship {
+  display: flex;
+  flex-wrap: wrap;
+  border-left: var(--sz-xxsm) solid var(--transparent-black-lg);
+}
+
+.select-ship-cell {
+  min-width: calc(100% / 8);
+  min-height: calc(100% / 8);
+  border: var(--sz-xxxsm) solid var(--transparent-black-lg);
+  position: relative;
+}
+
+.select-ship-cell:nth-child(1n + 7) {
+  border-top: none;
+  border-top: none;
+}
+
+.select-ship-cell:nth-child(1n + 1) {
+  border-left: none;
+}
+
+.shipLenImg {
+  position: absolute;
+  z-index: 100;
+  bottom: 0;
+}
+
+.inp_playerName {
+  border-radius: var(--sz-xsm);
+  padding: var(--sz-xsm);
+}
+
+.submit-playerName {
+  background: none;
+  border: none;
+}
+
+.player-board {
+  display: flex;
+  border-radius: var(--sz-sm);
+  box-shadow: var(--bx-shadow);
+  min-height: 310px;
+  min-width: 310px;
+}
+
+.hinge {
+  background-color: var(--sec-accent);
+  text-align: center;
+  border-radius: var(--sz-lg);
+  padding: var(--sz-xsm);
+}
+
+.select_computer_or_player2 {
+  display: flex;
+  column-gap: var(--sz-lg);
+}
+
+.check_player {
+  display: flex;
+  column-gap: var(--sz-xsm);
+}
+
+.hide {
+  display: none !important;
+}

@@ -3,7 +3,7 @@ import GameBoard from './gameBoard';
 export default function Player(
   playerOne,
   playerTwo = {
-    name: 'Computer',
+    name: 'Grok',
     board: GameBoard('computer'),
   },
 ) {
@@ -137,6 +137,9 @@ export default function Player(
 
 // Flow
 /* 
-select playing against computer or follow human
-if against computer - only one box to drag drop into game board will be provided
+it will be play against computer by default
+if you want to change 
+select the menu and choose player 2
+a box will be open for you to enter name, it will be `player 2` by default
+then you press enter
 */
