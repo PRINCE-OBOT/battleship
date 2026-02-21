@@ -31,49 +31,15 @@ export default function Player(
 
   const getCurrentBoardToAttack = () => boardToAttack;
 
-  const getValidAdjacentCoordinate = (coordinate) => {
-    const coordinateIndex = Number.isInteger(coordinate)
-      ? coordinate
-      : playerTwo.board.getIndexOfCoordinate(coordinate);
-
-    const leftCoordinateIndex = coordinateIndex - 1;
-    const topCoordinateIndex = coordinateIndex - 10;
-    const rightCoordinateIndex = coordinateIndex + 1;
-    const bottomCoordinateIndex = coordinateIndex + 10;
-
-    return [
-      {
-        indexOfCoordinate: leftCoordinateIndex,
-        isValid:
-          leftCoordinateIndex >= 0 &&
-          +playerTwoGridBoard[leftCoordinateIndex].getCoordinate()[1] <
-            +playerTwoGridBoard[coordinateIndex].getCoordinate()[1],
-      },
-      { indexOfCoordinate: topCoordinateIndex, isValid: topCoordinateIndex >= 0 },
-      {
-        indexOfCoordinate: rightCoordinateIndex,
-        isValid:
-          playerTwoGridBoard[rightCoordinateIndex].getCoordinate()[0] ===
-          playerTwoGridBoard[coordinateIndex].getCoordinate()[0],
-      },
-      { indexOfCoordinate: bottomCoordinateIndex, isValid: bottomCoordinateIndex < 100 },
-    ]
-      .filter(
-        (coordObj) =>
-          coordObj.isValid &&
-          allCoordinate.includes(playerTwoGridBoard[coordObj.indexOfCoordinate].getCoordinate()),
-      )
-      .map((coordObj) => {
-        return { indexOfCoordinate: coordObj.indexOfCoordinate };
-      });
-  };
-
   const computerSendAttack = (coordinateIndex, coordinate, modeKey) => {
     let isShipHit = playerOne.board.receiveAttack(coordinate);
 
     if (isShipHit) {
-      const validAdjacentCoordinate = getValidAdjacentCoordinate(coordinateIndex);
-      if (validAdjacentCoordinate.length) stack.unshift(validAdjacentCoordinate);
+      const validAdjacentIndex = playerOne.board.getValidAdjacentIndex(coordinateIndex);
+      const computerValidAdjacentIndex = validAdjacentIndex.filter((index) =>
+        allCoordinate.includes(playerOne.board.getCoordinate(index)),
+      );
+      if (computerValidAdjacentIndex.length) stack.unshift(computerValidAdjacentIndex);
       computerTurn(false, modeKey);
     }
   };
@@ -91,9 +57,7 @@ export default function Player(
         randomIndex: Math.floor(Math.random() * arrOfCoordinateIndex.length),
       };
 
-      const indexOfCoordinateObj = arrOfCoordinateIndex.splice(mode[modeKey], 1)[0];
-
-      coordinateIndex = indexOfCoordinateObj.indexOfCoordinate;
+      coordinateIndex = arrOfCoordinateIndex.splice(mode[modeKey], 1)[0];
       coordinate = playerOne.board.getBoard()[coordinateIndex].getCoordinate();
 
       allCoordinate.splice(allCoordinate.indexOf(coordinate), 1);
@@ -131,15 +95,5 @@ export default function Player(
   return {
     switchBoard,
     play,
-    getValidAdjacentCoordinate,
   };
 }
-
-// Flow
-/* 
-it will be play against computer by default
-if you want to change 
-select the menu and choose player 2
-a box will be open for you to enter name, it will be `player 2` by default
-then you press enter
-*/

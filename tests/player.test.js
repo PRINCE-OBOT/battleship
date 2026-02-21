@@ -27,26 +27,15 @@ describe('Computer Adjacent Coordinate', () => {
   const player = Player(playerOne);
 
   test('Should get all valid adjacent coordinate', () => {
-    expect(player.getValidAdjacentCoordinate('e4')).toEqual([
-      { indexOfCoordinate: 53 },
-      { indexOfCoordinate: 44 },
-      { indexOfCoordinate: 55 },
-      { indexOfCoordinate: 64 },
-    ]);
+    expect(playerOne.board.getValidAdjacentIndex('e4')).toEqual([53, 44, 55, 64]);
   });
 
   test('Should ignore top and right invalid direction', () => {
-    expect(player.getValidAdjacentCoordinate('j9')).toEqual([
-      { indexOfCoordinate: 8 },
-      { indexOfCoordinate: 19 },
-    ]);
+    expect(playerOne.board.getValidAdjacentIndex('j9')).toEqual([8, 19]);
   });
 
   test('Should ignore left and bottom invalid direction', () => {
-    expect(player.getValidAdjacentCoordinate('a0')).toEqual([
-      { indexOfCoordinate: 80 },
-      { indexOfCoordinate: 91 },
-    ]);
+    expect(playerOne.board.getValidAdjacentIndex('a0')).toEqual([80, 91]);
   });
 });
 

@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Battle Ship</title>
+    <title>Battleship</title>
   </head>
   <body>
     <div class="container">
       <main>
-        <div class="select-ship player-1-select-ship" data-select-ship="playerOne"></div>
+        <div class="select-ship player-1-select-ship" data-select-ship-board="playerOne"></div>
 
         <form action="" class="name-selection" data-form_player_one_name>
           <label for="player1Name">Player 1 Name:</label>
@@ -22,9 +22,9 @@
         </form>
 
         <div class="boards-section">
-          <div class="player-board playerplayer-1-board"></div>
+          <div class="player-board playerplayer-1-board" data-player-board="one"></div>
           <div class="hinge" data-play>Play</div>
-          <div class="player-board playerplayer-2-board"></div>
+          <div class="player-board playerplayer-2-board" data-player-board="two"></div>
         </div>
 
         <form class="select_computer_or_player2" data-select_computer_or_player2>
@@ -50,7 +50,7 @@
           />
         </form>
 
-        <div class="select-ship player-2-select-ship" data-select-ship="playerTwo"></div>
+        <div class="select-ship player-2-select-ship" data-select-ship-board="playerTwo"></div>
       </main>
     </div>
   </body>

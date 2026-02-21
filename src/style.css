@@ -136,8 +136,8 @@ main {
 }
 
 .select-ship-cell {
-  min-width: calc(100% / 8);
-  min-height: calc(100% / 8);
+  min-width: calc(100% / 10);
+  min-height: calc(100% / 10);
   border: var(--sz-xxxsm) solid var(--transparent-black-lg);
   position: relative;
 }
@@ -151,10 +151,11 @@ main {
   border-left: none;
 }
 
-.shipLenImg {
+.shipImg {
   position: absolute;
   z-index: 100;
   bottom: 0;
+  transform-origin: 0;
 }
 
 .inp_playerName {
@@ -169,10 +170,17 @@ main {
 
 .player-board {
   display: flex;
-  border-radius: var(--sz-sm);
-  box-shadow: var(--bx-shadow);
+  flex-wrap: wrap;
   min-height: 310px;
   min-width: 310px;
+  border: var(--sz-xxsm) solid var(--transparent-black-lg);
+}
+
+.player-board-cell {
+  min-height: calc(100% / 10);
+  min-width: calc(100% / 10);
+  border: 1px solid var(--transparent-black-lg);
+  position: relative;
 }
 
 .hinge {
@@ -192,6 +200,10 @@ main {
   column-gap: var(--sz-xsm);
 }
 
+.rotate {
+  transform: rotate(90deg) translateY(-50%) translateX(-14px);
+}
+
 .hide {
-  display: none !important;
+  display: none;
 }

@@ -50,31 +50,30 @@ export default function GameBoard(id) {
 
     let indexOfCoordinate = getIndexOfCoordinate(coordinate);
 
+    if (!isRightCoordinateValid(indexOfCoordinate, indexOfCoordinate + shipLen - 1)) return;
+
     let count = 0;
     let index = indexOfCoordinate;
-    let isShipInCell = false;
 
     while (count < shipLen) {
       const cell = board[index];
 
       if (cell.getShip()) {
-        isShipInCell = true;
-        break;
+        return;
       }
       count++;
       index++;
     }
 
-    if (!isShipInCell) {
-      count = 0;
-      index = indexOfCoordinate;
+    count = 0;
+    index = indexOfCoordinate;
 
-      while (count < shipLen) {
-        board[index].setShip(ship);
-        count++;
-        index++;
-      }
+    while (count < shipLen) {
+      board[index].setShip(ship);
+      count++;
+      index++;
     }
+    return true;
   };
 
   const getShip = (coordinate) => board[getIndexOfCoordinate(coordinate)].getShip();
@@ -86,8 +85,9 @@ export default function GameBoard(id) {
     ship.switchAxis();
     const axis = ship.getAxis();
 
+    if (!isBottomCoordinateValid(indexOfCoordinate)) return;
+
     let count = 0;
-    let isShipInNewCell = false;
     let oldIndex = indexOfCoordinate;
     let newIndex = indexOfCoordinate;
 
@@ -96,35 +96,33 @@ export default function GameBoard(id) {
 
       if (count !== 0) {
         if (newCell.getShip()) {
-          isShipInNewCell = true;
-          break;
+          return;
         }
       }
       count++;
       axis === 'xAxis' ? newIndex++ : (newIndex += 10);
     }
 
-    if (!isShipInNewCell) {
-      count = 0;
-      newIndex = indexOfCoordinate;
+    count = 0;
+    newIndex = indexOfCoordinate;
 
-      while (count < shipLen) {
-        const oldCell = board[oldIndex];
-        const newCell = board[newIndex];
-        const removedShip = oldCell.removeShip();
-        newCell.setShip(removedShip);
+    while (count < shipLen) {
+      const oldCell = board[oldIndex];
+      const newCell = board[newIndex];
+      const removedShip = oldCell.removeShip();
+      newCell.setShip(removedShip);
 
-        count++;
+      count++;
 
-        if (removedShip.getAxis() === 'xAxis') {
-          oldIndex += 10;
-          newIndex++;
-        } else {
-          oldIndex++;
-          newIndex += 10;
-        }
+      if (removedShip.getAxis() === 'xAxis') {
+        oldIndex += 10;
+        newIndex++;
+      } else {
+        oldIndex++;
+        newIndex += 10;
       }
     }
+    return true;
   };
 
   const receiveAttack = (coordinate) => {
@@ -143,6 +141,43 @@ export default function GameBoard(id) {
     return false;
   };
 
+  const isRightCoordinateValid = (coordinateIndex, rightCoordinateIndex) =>
+    board[coordinateIndex].getCoordinate()[0] === board[rightCoordinateIndex].getCoordinate()[0];
+
+  const isBottomCoordinateValid = (bottomCoordinateIndex) => bottomCoordinateIndex < 100;
+
+  const getValidAdjacentIndex = (coordinate) => {
+    const coordinateIndex = Number.isInteger(coordinate)
+      ? coordinate
+      : getIndexOfCoordinate(coordinate);
+
+    const leftCoordinateIndex = coordinateIndex - 1;
+    const topCoordinateIndex = coordinateIndex - 10;
+    const rightCoordinateIndex = coordinateIndex + 1;
+    const bottomCoordinateIndex = coordinateIndex + 10;
+
+    return [
+      {
+        indexOfCoordinate: leftCoordinateIndex,
+        isValid:
+          leftCoordinateIndex >= 0 &&
+          +board[leftCoordinateIndex].getCoordinate()[1] <
+            +board[coordinateIndex].getCoordinate()[1],
+      },
+      { indexOfCoordinate: topCoordinateIndex, isValid: topCoordinateIndex >= 0 },
+      {
+        indexOfCoordinate: rightCoordinateIndex,
+        isValid: isRightCoordinateValid(coordinateIndex, rightCoordinateIndex),
+      },
+      {
+        indexOfCoordinate: bottomCoordinateIndex,
+        isValid: isBottomCoordinateValid(bottomCoordinateIndex),
+      },
+    ]
+      .filter((coordObj) => coordObj.isValid)
+      .map((coordObj) => coordObj.indexOfCoordinate);
+  };
+
   const isAllShipSunk = () => {
     const cellWithShip = board.filter((cell) => cell.getShip());
     return cellWithShip.every((cell) => cell.getShip().isSunk());
@@ -154,6 +189,8 @@ export default function GameBoard(id) {
 
   const getCellInOrderOfHit = () => cellInOrderOfHit;
 
+  const getCoordinate = (index) => board[index].getCoordinate();
+
   const getID = () => id;
 
   return {
@@ -163,9 +200,11 @@ export default function GameBoard(id) {
     receiveAttack,
     isAllShipSunk,
     getAllCoordinate,
+    getCoordinate,
     getBoard,
     getIndexOfCoordinate,
     getCellInOrderOfHit,
+    getValidAdjacentIndex,
     getID,
   };
 }
