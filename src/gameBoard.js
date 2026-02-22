@@ -132,12 +132,12 @@ export default function GameBoard(id) {
 
     if (!cell.isCellHit()) {
       cellInOrderOfHit.push(coordinate);
+      cell.hitCell();
       const ship = cell.getShip();
       if (ship) {
         ship.hit();
         return true;
       }
-      cell.hitCell();
     }
     return false;
   };
@@ -197,11 +197,15 @@ export default function GameBoard(id) {
 
   const getID = () => id;
 
+  const getHitCellCoordinate = () =>
+    board.filter((cell) => cell.isCellHit()).map((cell) => cell.getCoordinate());
+
   return {
     setShip,
     getShip,
     switchShipAxis,
     receiveAttack,
+    getHitCellCoordinate,
     isAllShipSunk,
     getAllCoordinate,
     getCoordinate,

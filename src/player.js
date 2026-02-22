@@ -1,20 +1,14 @@
 import GameBoard from './gameBoard';
 
-export default function Player(
-  playerOne,
-  playerTwo = {
-    name: 'Grok',
-    board: GameBoard('computer'),
-  },
-) {
+export default function Player(playerOne, playerTwo) {
   const stack = [];
-  const allCoordinate = playerTwo.board.getAllCoordinate();
+  const allCoordinate = playerTwo.getAllCoordinate();
 
-  const playerOneID = playerOne.board.getID();
-  const playerTwoID = playerTwo.board.getID();
+  const playerOneID = playerOne.getID();
+  const playerTwoID = playerTwo.getID();
 
-  const playerOneGridBoard = playerOne.board.getBoard();
-  const playerTwoGridBoard = playerTwo.board.getBoard();
+  const playerOneGridBoard = playerOne.getBoard();
+  const playerTwoGridBoard = playerTwo.getBoard();
 
   let playerID = playerOneID;
   let boardToAttack = playerTwoGridBoard;
@@ -32,12 +26,12 @@ export default function Player(
   const getCurrentBoardToAttack = () => boardToAttack;
 
   const computerSendAttack = (coordinateIndex, coordinate, modeKey) => {
-    let isShipHit = playerOne.board.receiveAttack(coordinate);
+    let isShipHit = playerOne.receiveAttack(coordinate);
 
     if (isShipHit) {
-      const validAdjacentIndex = playerOne.board.getValidAdjacentIndex(coordinateIndex);
+      const validAdjacentIndex = playerOne.getValidAdjacentIndex(coordinateIndex);
       const computerValidAdjacentIndex = validAdjacentIndex.filter((index) =>
-        allCoordinate.includes(playerOne.board.getCoordinate(index)),
+        allCoordinate.includes(playerOne.getCoordinate(index)),
       );
       if (computerValidAdjacentIndex.length) stack.unshift(computerValidAdjacentIndex);
       computerTurn(false, modeKey);
@@ -58,7 +52,7 @@ export default function Player(
       };
 
       coordinateIndex = arrOfCoordinateIndex.splice(mode[modeKey], 1)[0];
-      coordinate = playerOne.board.getBoard()[coordinateIndex].getCoordinate();
+      coordinate = playerOne.getBoard()[coordinateIndex].getCoordinate();
 
       allCoordinate.splice(allCoordinate.indexOf(coordinate), 1);
 
@@ -67,22 +61,22 @@ export default function Player(
       coordinateIndex = Math.floor(Math.random() * allCoordinate.length);
       coordinate = allCoordinate.splice(coordinateIndex, 1).toString();
     } else {
-      coordinateIndex = playerTwo.board.getIndexOfCoordinate(specificCoordinate);
+      coordinateIndex = playerTwo.getIndexOfCoordinate(specificCoordinate);
     }
 
     computerSendAttack(coordinateIndex, coordinate, modeKey);
   };
 
   const humanTurn = (coordinate) => {
-    playerTwo.board.receiveAttack(coordinate);
+    playerTwo.receiveAttack(coordinate);
   };
 
   const isPlayerTurn = (id) => getCurrentPlayerID() === id;
 
   const play = (coordinate, id, modeKey) => {
-    if (playerTwo.board.getID() === 'computer') {
+    if (playerTwo.getID() === 'computer') {
       humanTurn(coordinate);
-      computerTurn(coordinate, modeKey);
+      computerTurn((coordinate = false), modeKey);
     } else {
       if (!isPlayerTurn(id)) return;
       getCurrentBoardToAttack().receiveAttack(coordinate);

@@ -194,6 +194,10 @@ main {
   column-gap: var(--sz-lg);
 }
 
+.attackCell {
+  background: pink;
+}
+
 .check_player {
   display: flex;
   column-gap: var(--sz-xsm);

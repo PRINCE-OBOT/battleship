@@ -30,7 +30,7 @@ const playerTwo = {
 };
 
 const computer = {
-  board: GameBoard(),
+  board: GameBoard('computer'),
 };
 
 const playerOneBoardID = playerOne.board.getID();
@@ -91,11 +91,6 @@ playerOne.board.getAllCoordinate().forEach((coordinate) => {
   });
 });
 
-function startGame() {
-  if (formPlayerTwoName.classList.contains('hide')) Player(playerOne);
-  else Player(playerOne, playerTwo);
-}
-
 function ShipSelection() {
   let selectedShip = null;
 
@@ -143,15 +138,13 @@ function setShip(e) {
   }
 }
 
-// when play is click run
-// remember to pass the board as an argument instead of the obj.board
 function setComputerShip() {
   const availableLen = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
   const allCoordinate = computer.board.getAllCoordinate();
 
   const isShipSet = (len) => {
     const randomIndex = Math.floor(Math.random() * allCoordinate.length);
-    return computer.board.setShip({ len }, allCoordinate[randomIndex]);
+    return computer.board.setShip({ len, id: 'computer' }, allCoordinate[randomIndex]);
   };
 
   while (availableLen.length) {
@@ -181,8 +174,6 @@ function setComputerShip() {
   });
 }
 
-setComputerShip();
-
 const player2Tool = [formPlayerTwoName, playerTwoSelectShipBoard];
 
 function togglePlayer2Name() {
@@ -193,13 +184,67 @@ function togglePlayer2Name() {
   } else player2Tool.forEach((tool) => tool.classList.remove('hide'));
 }
 
+function Game() {
+  let player;
+
+  function start() {
+    const inpCheckPlayer = document.querySelector('[data-inp_check_player]:checked');
+
+    if (inpCheckPlayer.id === 'computer') {
+      setComputerShip();
+      player = Player(playerOne.board, computer.board);
+    } else {
+      player = Player(playerOne.board, playerTwo.board);
+    }
+  }
+
+  const markPlayerOneHitCell = () => {
+    playerOne.board.getHitCellCoordinate().forEach((coord) => {
+      const cell = playerOneBoard.querySelector(`[data-coordinate='${coord}']`);
+      cell.classList.add('attackCell');
+    });
+  };
+
+  const markPlayerTwoHitCell = () => {
+    playerTwo.board.getHitCellCoordinate().forEach((coord) => {
+      const cell = playerOneBoard.querySelector(`[data-coordinate='${coord}']`);
+      cell.classList.add('attackCell');
+    });
+  };
+
+  const markComputerHitCell = () => {
+    computer.board.getHitCellCoordinate().forEach((coord) => {
+      const cell = playerTwoBoard.querySelector(`[data-coordinate='${coord}']`);
+      cell.classList.add('attackCell');
+    });
+  };
+
+  function attackShip(e) {
+    if (!player) return;
+
+    const cell = e.target;
+    const id = cell.closest('[data-player-board]').id;
+    const coordinate = cell.dataset.coordinate;
+    player.play(coordinate, id);
+
+    markPlayerOneHitCell();
+    markComputerHitCell();
+  }
+
+  return { start, attackShip };
+}
+
+const game = Game();
+
 togglePlayer2Name();
 select_player2_or_computer.addEventListener('change', togglePlayer2Name);
 
-play.addEventListener('click', startGame);
+play.addEventListener('click', game.start);
 
 playerOneSelectShipBoard.addEventListener('click', shipSel.selectShip);
 playerOneBoard.addEventListener('click', setShip);
+playerOneBoard.addEventListener('click', game.attackShip);
+// playerTwoBoard.addEventListener('click', game.attackShip);
 document.addEventListener('click', () => {
   shipSel.unselectShip();
 });
