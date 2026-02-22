@@ -85,7 +85,7 @@ export default function GameBoard(id) {
     ship.switchAxis();
     const axis = ship.getAxis();
 
-    if (!isBottomCoordinateValid(indexOfCoordinate)) return;
+    if (!isBottomCoordinateValid(indexOfCoordinate + shipLen * 10)) return;
 
     let count = 0;
     let oldIndex = indexOfCoordinate;
@@ -95,6 +95,7 @@ export default function GameBoard(id) {
       const newCell = board[newIndex];
 
       if (count !== 0) {
+        // debugger
         if (newCell.getShip()) {
           return;
         }
@@ -183,6 +184,9 @@ export default function GameBoard(id) {
     return cellWithShip.every((cell) => cell.getShip().isSunk());
   };
 
+  const getCoordinateOfShip = () =>
+    new Set(board.filter((cell) => cell.getShip()).map((cell) => cell.getShip().getCoordinate()));
+
   const getAllCoordinate = () => board.map((cell) => cell.getCoordinate());
 
   const getBoard = () => board;
@@ -205,6 +209,7 @@ export default function GameBoard(id) {
     getIndexOfCoordinate,
     getCellInOrderOfHit,
     getValidAdjacentIndex,
+    getCoordinateOfShip,
     getID,
   };
 }

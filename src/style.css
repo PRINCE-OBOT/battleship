@@ -184,10 +184,9 @@ main {
 }
 
 .hinge {
-  background-color: var(--sec-accent);
+  background-color: var(--pri-accent);
   text-align: center;
-  border-radius: var(--sz-lg);
-  padding: var(--sz-xsm);
+  padding: var(--sz-xxsm);
 }
 
 .select_computer_or_player2 {
@@ -206,4 +205,20 @@ main {
 
 .hide {
   display: none;
+}
+.bgColor {
+  background-color: var(--transparent-black-lg);
+}
+
+[data-len='1'] {
+  border: 2px solid rgb(156, 61, 10);
+}
+[data-len='2'] {
+  border: 2px solid green;
+}
+[data-len='3'] {
+  border: 2px solid rgb(50, 20, 158);
+}
+[data-len='4'] {
+  border: 2px solid rgb(176, 10, 115);
 }

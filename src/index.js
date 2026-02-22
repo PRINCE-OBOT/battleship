@@ -29,6 +29,10 @@ const playerTwo = {
   board: GameBoard(crypto.randomUUID()),
 };
 
+const computer = {
+  board: GameBoard(),
+};
+
 const playerOneBoardID = playerOne.board.getID();
 
 playerOneBoard.id = playerOneBoardID;
@@ -93,18 +97,23 @@ function startGame() {
 }
 
 function ShipSelection() {
-  const markShip = [];
+  let selectedShip = null;
 
-  function mark(e) {
-    if (!e.target.dataset.len) return;
-    markShip.unshift(e.target);
+  function selectShip(e) {
+    e.stopPropagation();
+    const ship = e.target;
+    if (ship.dataset.len) {
+      selectedShip = ship;
+    }
   }
 
-  const getMarkShip = () => markShip[0];
+  const getSelectedShip = () => selectedShip;
 
-  const clearMarkShip = () => markShip.splice(0);
+  const unselectShip = () => {
+    selectedShip = null;
+  };
 
-  return { mark, getMarkShip, clearMarkShip };
+  return { selectShip, getSelectedShip, unselectShip };
 }
 
 const shipSel = ShipSelection();
@@ -122,7 +131,7 @@ function setShip(e) {
       ship.classList.toggle('rotate');
     }
   } else if (coordinate) {
-    const shipElem = shipSel.getMarkShip();
+    const shipElem = shipSel.getSelectedShip();
     if (!shipElem) return;
     const id = shipElem.id;
     const len = +shipElem.getAttribute('data-len');
@@ -130,10 +139,49 @@ function setShip(e) {
     const isShipSetOnBoard = board.setShip({ id, len }, coordinate);
     if (isShipSetOnBoard) {
       cell.append(shipElem);
-      shipSel.clearMarkShip();
     }
   }
 }
+
+// when play is click run
+// remember to pass the board as an argument instead of the obj.board
+function setComputerShip() {
+  const availableLen = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+  const allCoordinate = computer.board.getAllCoordinate();
+
+  const isShipSet = (len) => {
+    const randomIndex = Math.floor(Math.random() * allCoordinate.length);
+    return computer.board.setShip({ len }, allCoordinate[randomIndex]);
+  };
+
+  while (availableLen.length) {
+    const len = availableLen.shift();
+
+    while (true) {
+      if (isShipSet(len)) {
+        break;
+      }
+    }
+  }
+
+  [...computer.board.getCoordinateOfShip()].slice(7).forEach((coordinate) => {
+    computer.board.switchShipAxis(coordinate);
+  });
+
+  playerTwoBoard.innerHTML = '';
+  computer.board.getBoard().forEach((cell) => {
+    const cellElem = document.createElement('div');
+    cellElem.setAttribute('data-coordinate', cell.getCoordinate());
+    cellElem.classList.add('player-board-cell');
+    if (cell.getShip()) {
+      cellElem.classList.add('bgColor');
+      cellElem.setAttribute('data-len', `${cell.getShip().len()}`);
+    }
+    playerTwoBoard.append(cellElem);
+  });
+}
+
+setComputerShip();
 
 const player2Tool = [formPlayerTwoName, playerTwoSelectShipBoard];
 
@@ -150,5 +198,8 @@ select_player2_or_computer.addEventListener('change', togglePlayer2Name);
 
 play.addEventListener('click', startGame);
 
-playerOneSelectShipBoard.addEventListener('click', shipSel.mark);
+playerOneSelectShipBoard.addEventListener('click', shipSel.selectShip);
 playerOneBoard.addEventListener('click', setShip);
+document.addEventListener('click', () => {
+  shipSel.unselectShip();
+});
