@@ -21,6 +21,8 @@ const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
 
 const selectShipDim = 300;
 
+let isGameBetweenHuman = false;
+
 const playerOne = {
   board: GameBoard(crypto.randomUUID()),
 };
@@ -139,27 +141,7 @@ function setShip(e) {
 }
 
 function setComputerShip() {
-  const availableLen = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
-  const allCoordinate = computer.board.getAllCoordinate();
-
-  const isShipSet = (len) => {
-    const randomIndex = Math.floor(Math.random() * allCoordinate.length);
-    return computer.board.setShip({ len, id: 'computer' }, allCoordinate[randomIndex]);
-  };
-
-  while (availableLen.length) {
-    const len = availableLen.shift();
-
-    while (true) {
-      if (isShipSet(len)) {
-        break;
-      }
-    }
-  }
-
-  [...computer.board.getCoordinateOfShip()].slice(7).forEach((coordinate) => {
-    computer.board.switchShipAxis(coordinate);
-  });
+  computer.board.setShipDynamically();
 
   playerTwoBoard.innerHTML = '';
   computer.board.getBoard().forEach((cell) => {
@@ -167,7 +149,6 @@ function setComputerShip() {
     cellElem.setAttribute('data-coordinate', cell.getCoordinate());
     cellElem.classList.add('player-board-cell');
     if (cell.getShip()) {
-      cellElem.classList.add('bgColor');
       cellElem.setAttribute('data-len', `${cell.getShip().len()}`);
     }
     playerTwoBoard.append(cellElem);
@@ -189,8 +170,9 @@ function Game() {
 
   function start() {
     const inpCheckPlayer = document.querySelector('[data-inp_check_player]:checked');
+    isGameBetweenHuman = inpCheckPlayer.id === 'computer' ? false : true;
 
-    if (inpCheckPlayer.id === 'computer') {
+    if (!isGameBetweenHuman) {
       setComputerShip();
       player = Player(playerOne.board, computer.board);
     } else {
@@ -207,7 +189,7 @@ function Game() {
 
   const markPlayerTwoHitCell = () => {
     playerTwo.board.getHitCellCoordinate().forEach((coord) => {
-      const cell = playerOneBoard.querySelector(`[data-coordinate='${coord}']`);
+      const cell = playerTwoBoard.querySelector(`[data-coordinate='${coord}']`);
       cell.classList.add('attackCell');
     });
   };
@@ -227,8 +209,8 @@ function Game() {
     const coordinate = cell.dataset.coordinate;
     player.play(coordinate, id);
 
+    isGameBetweenHuman ? markPlayerTwoHitCell() : markComputerHitCell();
     markPlayerOneHitCell();
-    markComputerHitCell();
   }
 
   return { start, attackShip };

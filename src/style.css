@@ -214,15 +214,17 @@ main {
   background-color: var(--transparent-black-lg);
 }
 
-[data-len='1'] {
-  border: 2px solid rgb(156, 61, 10);
-}
-[data-len='2'] {
-  border: 2px solid green;
-}
-[data-len='3'] {
-  border: 2px solid rgb(50, 20, 158);
-}
-[data-len='4'] {
-  border: 2px solid rgb(176, 10, 115);
+.player-2-board {
+  [data-len='1'] {
+    background: rgb(27, 71, 85);
+  }
+  [data-len='2'] {
+    background: rgb(164, 181, 12);
+  }
+  [data-len='3'] {
+    background: rgb(80, 23, 214);
+  }
+  [data-len='4'] {
+    background: rgb(202, 8, 199);
+  }
 }

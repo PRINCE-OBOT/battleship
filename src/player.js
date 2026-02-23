@@ -26,7 +26,7 @@ export default function Player(playerOne, playerTwo) {
   const getCurrentBoardToAttack = () => boardToAttack;
 
   const computerSendAttack = (coordinateIndex, coordinate, modeKey) => {
-    let isShipHit = playerOne.receiveAttack(coordinate);
+    let isShipHit = playerOne.receiveAttack(coordinate) === 'hit';
 
     if (isShipHit) {
       const validAdjacentIndex = playerOne.getValidAdjacentIndex(coordinateIndex);
@@ -68,15 +68,18 @@ export default function Player(playerOne, playerTwo) {
   };
 
   const humanTurn = (coordinate) => {
-    playerTwo.receiveAttack(coordinate);
+    return playerTwo.receiveAttack(coordinate);
   };
 
   const isPlayerTurn = (id) => getCurrentPlayerID() === id;
 
   const play = (coordinate, id, modeKey) => {
     if (playerTwo.getID() === 'computer') {
-      humanTurn(coordinate);
-      computerTurn((coordinate = false), modeKey);
+      const result = humanTurn(coordinate);
+      if (result) {
+        computerTurn(false, modeKey);
+        return { result };
+      }
     } else {
       if (!isPlayerTurn(id)) return;
       getCurrentBoardToAttack().receiveAttack(coordinate);

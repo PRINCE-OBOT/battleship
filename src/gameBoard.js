@@ -42,6 +42,42 @@ export default function GameBoard(id) {
   const getIndexOfCoordinate = (coordinate) =>
     board.findIndex((cell) => cell.getCoordinate() === coordinate);
 
+  const isInterSection = (index) => {
+    const validAdjacentIndexInObj = getValidAdjacentIndexInObj(index);
+
+    const leftIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'left');
+    const topIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'top');
+    const bottomIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'bottom');
+    const rightIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'right');
+
+    const nearestCoord = validAdjacentIndexInObj.map((obj) => obj.indexOfCoordinate);
+
+    if (leftIndex !== -1) {
+      if (topIndex !== -1) {
+        const topLeftIndex = validAdjacentIndexInObj[topIndex].indexOfCoordinate - 1;
+        nearestCoord.push(topLeftIndex);
+      }
+
+      if (bottomIndex !== -1) {
+        const bottomLeftIndex = validAdjacentIndexInObj[bottomIndex].indexOfCoordinate - 1;
+        nearestCoord.push(bottomLeftIndex);
+      }
+    }
+
+    if (rightIndex !== -1) {
+      if (topIndex !== -1) {
+        const topRightIndex = validAdjacentIndexInObj[topIndex].indexOfCoordinate + 1;
+        nearestCoord.push(topRightIndex);
+      }
+      if (bottomIndex !== -1) {
+        const bottomRightIndex = validAdjacentIndexInObj[bottomIndex].indexOfCoordinate + 1;
+        nearestCoord.push(bottomRightIndex);
+      }
+    }
+
+    return nearestCoord;
+  };
+
   const setShip = (shipTemplate, coordinate) => {
     if (shipTemplate.id !== id) return;
 
@@ -58,7 +94,10 @@ export default function GameBoard(id) {
     while (count < shipLen) {
       const cell = board[index];
 
-      if (cell.getShip()) {
+      if (
+        cell.getShip() ||
+        isInterSection(index).some((indexCoord) => board[indexCoord].getShip())
+      ) {
         return;
       }
       count++;
@@ -81,6 +120,9 @@ export default function GameBoard(id) {
   const switchShipAxis = (coordinate) => {
     const indexOfCoordinate = getIndexOfCoordinate(coordinate);
     const ship = board[indexOfCoordinate].getShip();
+
+    if (!ship) return;
+
     const shipLen = ship.len();
     ship.switchAxis();
     const axis = ship.getAxis();
@@ -91,38 +133,56 @@ export default function GameBoard(id) {
     let oldIndex = indexOfCoordinate;
     let newIndex = indexOfCoordinate;
 
+    const reset = () => {
+      count = 0;
+      oldIndex = indexOfCoordinate;
+      newIndex = indexOfCoordinate;
+    };
+
+    const tempRemoveShip = [];
+    while (count < shipLen) {
+      const oldCell = board[oldIndex];
+      tempRemoveShip.push({ ship: oldCell.removeShip(), oldIndex });
+
+      count++;
+      axis === 'xAxis' ? (oldIndex += 10) : oldIndex++;
+    }
+
+    reset();
+
     while (count < shipLen) {
       const newCell = board[newIndex];
 
-      if (count !== 0) {
-        // debugger
-        if (newCell.getShip()) {
-          return;
-        }
+      if (
+        newCell.getShip() ||
+        isInterSection(newIndex).some((indexCoord) => board[indexCoord].getShip())
+      ) {
+        tempRemoveShip.forEach((obj) => {
+          board[obj.oldIndex].setShip(obj.ship);
+        });
+        return;
       }
+
       count++;
       axis === 'xAxis' ? newIndex++ : (newIndex += 10);
     }
 
-    count = 0;
-    newIndex = indexOfCoordinate;
+    reset();
 
-    while (count < shipLen) {
-      const oldCell = board[oldIndex];
-      const newCell = board[newIndex];
-      const removedShip = oldCell.removeShip();
-      newCell.setShip(removedShip);
-
-      count++;
-
-      if (removedShip.getAxis() === 'xAxis') {
-        oldIndex += 10;
-        newIndex++;
+    tempRemoveShip.forEach((obj, ind) => {
+      if (ind === 0) {
+        newIndex = obj.oldIndex;
       } else {
-        oldIndex++;
-        newIndex += 10;
+        if (axis === 'xAxis') {
+          newIndex++;
+        } else {
+          newIndex += 10;
+        }
       }
-    }
+
+      board[newIndex].setShip(obj.ship);
+    });
+
     return true;
   };
 
@@ -136,18 +196,23 @@ export default function GameBoard(id) {
       const ship = cell.getShip();
       if (ship) {
         ship.hit();
-        return true;
+        return 'hit';
       }
+      return 'miss';
     }
     return false;
   };
 
-  const isRightCoordinateValid = (coordinateIndex, rightCoordinateIndex) =>
-    board[coordinateIndex].getCoordinate()[0] === board[rightCoordinateIndex].getCoordinate()[0];
+  const isRightCoordinateValid = (coordinateIndex, rightCoordinateIndex) => {
+    if (rightCoordinateIndex >= 100) return;
+    return (
+      board[coordinateIndex].getCoordinate()[0] === board[rightCoordinateIndex].getCoordinate()[0]
+    );
+  };
 
   const isBottomCoordinateValid = (bottomCoordinateIndex) => bottomCoordinateIndex < 100;
 
-  const getValidAdjacentIndex = (coordinate) => {
+  const getValidAdjacentIndexInObj = (coordinate) => {
     const coordinateIndex = Number.isInteger(coordinate)
       ? coordinate
       : getIndexOfCoordinate(coordinate);
@@ -160,23 +225,52 @@ export default function GameBoard(id) {
     return [
       {
         indexOfCoordinate: leftCoordinateIndex,
+        dir: 'left',
         isValid:
           leftCoordinateIndex >= 0 &&
           +board[leftCoordinateIndex].getCoordinate()[1] <
             +board[coordinateIndex].getCoordinate()[1],
       },
-      { indexOfCoordinate: topCoordinateIndex, isValid: topCoordinateIndex >= 0 },
+      { indexOfCoordinate: topCoordinateIndex, dir: 'top', isValid: topCoordinateIndex >= 0 },
       {
         indexOfCoordinate: rightCoordinateIndex,
+        dir: 'right',
         isValid: isRightCoordinateValid(coordinateIndex, rightCoordinateIndex),
       },
       {
         indexOfCoordinate: bottomCoordinateIndex,
+        dir: 'bottom',
         isValid: isBottomCoordinateValid(bottomCoordinateIndex),
       },
-    ]
-      .filter((coordObj) => coordObj.isValid)
-      .map((coordObj) => coordObj.indexOfCoordinate);
+    ].filter((coordObj) => coordObj.isValid);
+  };
+
+  const getValidAdjacentIndex = (coordinate) => {
+    return getValidAdjacentIndexInObj(coordinate).map((coordObj) => coordObj.indexOfCoordinate);
+  };
+
+  const setShipDynamically = () => {
+    const availableLen = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+    const allCoordinate = getAllCoordinate();
+
+    const isShipSet = (len) => {
+      const randomIndex = Math.floor(Math.random() * allCoordinate.length);
+      return setShip({ len, id: 'computer' }, allCoordinate[randomIndex]);
+    };
+
+    while (availableLen.length) {
+      const len = availableLen.shift();
+
+      while (true) {
+        if (isShipSet(len)) {
+          break;
+        }
+      }
+    }
+
+    [...getCoordinateOfShip()].slice(7).forEach((coordinate) => {
+      switchShipAxis(coordinate);
+    });
   };
 
   const isAllShipSunk = () => {
@@ -206,6 +300,7 @@ export default function GameBoard(id) {
     switchShipAxis,
     receiveAttack,
     getHitCellCoordinate,
+    setShipDynamically,
     isAllShipSunk,
     getAllCoordinate,
     getCoordinate,
