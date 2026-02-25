@@ -20,11 +20,15 @@ function Cell(coordinate) {
     hit = true;
   };
 
+  const resetHit = () => {
+    hit = false;
+  };
+
   const isCellHit = () => hit;
 
   const getCoordinate = () => coordinate;
 
-  return { setShip, getShip, removeShip, hitCell, isCellHit, getCoordinate };
+  return { setShip, getShip, removeShip, hitCell, isCellHit, resetHit, getCoordinate };
 }
 
 export default function GameBoard(id) {
@@ -39,38 +43,38 @@ export default function GameBoard(id) {
     }
   }
 
-  const getIndexOfCoordinate = (coordinate) =>
+  const getCoordinateIndex = (coordinate) =>
     board.findIndex((cell) => cell.getCoordinate() === coordinate);
 
   const isInterSection = (index) => {
-    const validAdjacentIndexInObj = getValidAdjacentIndexInObj(index);
+    const validAdjacentIndexInObj = getValidAdjacentCoordinateInObj(index);
 
     const leftIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'left');
     const topIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'top');
     const bottomIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'bottom');
     const rightIndex = validAdjacentIndexInObj.findIndex((obj) => obj.dir === 'right');
 
-    const nearestCoord = validAdjacentIndexInObj.map((obj) => obj.indexOfCoordinate);
+    const nearestCoord = validAdjacentIndexInObj.map((obj) => obj.coordinateIndex);
 
     if (leftIndex !== -1) {
       if (topIndex !== -1) {
-        const topLeftIndex = validAdjacentIndexInObj[topIndex].indexOfCoordinate - 1;
+        const topLeftIndex = validAdjacentIndexInObj[topIndex].coordinateIndex - 1;
         nearestCoord.push(topLeftIndex);
       }
 
       if (bottomIndex !== -1) {
-        const bottomLeftIndex = validAdjacentIndexInObj[bottomIndex].indexOfCoordinate - 1;
+        const bottomLeftIndex = validAdjacentIndexInObj[bottomIndex].coordinateIndex - 1;
         nearestCoord.push(bottomLeftIndex);
       }
     }
 
     if (rightIndex !== -1) {
       if (topIndex !== -1) {
-        const topRightIndex = validAdjacentIndexInObj[topIndex].indexOfCoordinate + 1;
+        const topRightIndex = validAdjacentIndexInObj[topIndex].coordinateIndex + 1;
         nearestCoord.push(topRightIndex);
       }
       if (bottomIndex !== -1) {
-        const bottomRightIndex = validAdjacentIndexInObj[bottomIndex].indexOfCoordinate + 1;
+        const bottomRightIndex = validAdjacentIndexInObj[bottomIndex].coordinateIndex + 1;
         nearestCoord.push(bottomRightIndex);
       }
     }
@@ -84,12 +88,12 @@ export default function GameBoard(id) {
     const ship = Ship(shipTemplate.len, coordinate);
     const shipLen = ship.len();
 
-    let indexOfCoordinate = getIndexOfCoordinate(coordinate);
+    let coordinateIndex = getCoordinateIndex(coordinate);
 
-    if (!isRightCoordinateValid(indexOfCoordinate, indexOfCoordinate + shipLen - 1)) return;
+    if (!isRightCoordinateValid(coordinateIndex, coordinateIndex + shipLen - 1)) return;
 
     let count = 0;
-    let index = indexOfCoordinate;
+    let index = coordinateIndex;
 
     while (count < shipLen) {
       const cell = board[index];
@@ -105,7 +109,7 @@ export default function GameBoard(id) {
     }
 
     count = 0;
-    index = indexOfCoordinate;
+    index = coordinateIndex;
 
     while (count < shipLen) {
       board[index].setShip(ship);
@@ -115,11 +119,11 @@ export default function GameBoard(id) {
     return true;
   };
 
-  const getShip = (coordinate) => board[getIndexOfCoordinate(coordinate)].getShip();
+  const getShip = (coordinate) => board[getCoordinateIndex(coordinate)].getShip();
 
   const switchShipAxis = (coordinate) => {
-    const indexOfCoordinate = getIndexOfCoordinate(coordinate);
-    const ship = board[indexOfCoordinate].getShip();
+    const coordinateIndex = getCoordinateIndex(coordinate);
+    const ship = board[coordinateIndex].getShip();
 
     if (!ship) return;
 
@@ -127,16 +131,16 @@ export default function GameBoard(id) {
     ship.switchAxis();
     const axis = ship.getAxis();
 
-    if (!isBottomCoordinateValid(indexOfCoordinate + shipLen * 10)) return;
+    if (!isBottomCoordinateValid(coordinateIndex + shipLen * 10)) return;
 
     let count = 0;
-    let oldIndex = indexOfCoordinate;
-    let newIndex = indexOfCoordinate;
+    let oldIndex = coordinateIndex;
+    let newIndex = coordinateIndex;
 
     const reset = () => {
       count = 0;
-      oldIndex = indexOfCoordinate;
-      newIndex = indexOfCoordinate;
+      oldIndex = coordinateIndex;
+      newIndex = coordinateIndex;
     };
 
     const tempRemoveShip = [];
@@ -187,8 +191,8 @@ export default function GameBoard(id) {
   };
 
   const receiveAttack = (coordinate) => {
-    const indexOfCoordinate = getIndexOfCoordinate(coordinate);
-    const cell = board[indexOfCoordinate];
+    const coordinateIndex = getCoordinateIndex(coordinate);
+    const cell = board[coordinateIndex];
 
     if (!cell.isCellHit()) {
       cellInOrderOfHit.push(coordinate);
@@ -212,10 +216,10 @@ export default function GameBoard(id) {
 
   const isBottomCoordinateValid = (bottomCoordinateIndex) => bottomCoordinateIndex < 100;
 
-  const getValidAdjacentIndexInObj = (coordinate) => {
+  const getValidAdjacentCoordinateInObj = (coordinate) => {
     const coordinateIndex = Number.isInteger(coordinate)
       ? coordinate
-      : getIndexOfCoordinate(coordinate);
+      : getCoordinateIndex(coordinate);
 
     const leftCoordinateIndex = coordinateIndex - 1;
     const topCoordinateIndex = coordinateIndex - 10;
@@ -224,29 +228,36 @@ export default function GameBoard(id) {
 
     return [
       {
-        indexOfCoordinate: leftCoordinateIndex,
+        coordinateIndex: leftCoordinateIndex,
         dir: 'left',
         isValid:
           leftCoordinateIndex >= 0 &&
           +board[leftCoordinateIndex].getCoordinate()[1] <
             +board[coordinateIndex].getCoordinate()[1],
       },
-      { indexOfCoordinate: topCoordinateIndex, dir: 'top', isValid: topCoordinateIndex >= 0 },
+      { coordinateIndex: topCoordinateIndex, dir: 'top', isValid: topCoordinateIndex >= 0 },
       {
-        indexOfCoordinate: rightCoordinateIndex,
+        coordinateIndex: rightCoordinateIndex,
         dir: 'right',
         isValid: isRightCoordinateValid(coordinateIndex, rightCoordinateIndex),
       },
       {
-        indexOfCoordinate: bottomCoordinateIndex,
+        coordinateIndex: bottomCoordinateIndex,
         dir: 'bottom',
         isValid: isBottomCoordinateValid(bottomCoordinateIndex),
       },
-    ].filter((coordObj) => coordObj.isValid);
+    ]
+      .filter((coordObj) => coordObj.isValid)
+      .filter((coordObj) => !getBoard()[coordObj.coordinateIndex].isCellHit())
+      .map((coordObj) => {
+        coordObj.axis = coordObj.dir === 'top' || coordObj.dir === 'bottom' ? 'yAxis' : 'xAxis';
+        coordObj.coordinate = getCoordinate(coordObj.coordinateIndex);
+        return coordObj;
+      });
   };
 
   const getValidAdjacentIndex = (coordinate) => {
-    return getValidAdjacentIndexInObj(coordinate).map((coordObj) => coordObj.indexOfCoordinate);
+    return getValidAdjacentCoordinateInObj(coordinate).map((coordObj) => coordObj.coordinateIndex);
   };
 
   const setShipDynamically = () => {
@@ -268,7 +279,7 @@ export default function GameBoard(id) {
       }
     }
 
-    [...getCoordinateOfShip()].slice(7).forEach((coordinate) => {
+    [...getCoordinateOfShip()].slice(2).forEach((coordinate) => {
       switchShipAxis(coordinate);
     });
   };
@@ -281,11 +292,11 @@ export default function GameBoard(id) {
   const getCoordinateOfShip = () =>
     new Set(board.filter((cell) => cell.getShip()).map((cell) => cell.getShip().getCoordinate()));
 
-  const getAllCoordinate = () => board.map((cell) => cell.getCoordinate());
-
   const getBoard = () => board;
 
   const getCellInOrderOfHit = () => cellInOrderOfHit;
+
+  const getAllCoordinate = () => board.map((cell) => cell.getCoordinate());
 
   const getCoordinate = (index) => board[index].getCoordinate();
 
@@ -293,6 +304,18 @@ export default function GameBoard(id) {
 
   const getHitCellCoordinate = () =>
     board.filter((cell) => cell.isCellHit()).map((cell) => cell.getCoordinate());
+
+  const reset = () => {};
+
+  const playAgain = () => {
+    board.forEach((cell) => {
+      const ship = cell.getShip();
+      if (ship) {
+        ship.reset();
+      }
+      cell.resetHit();
+    });
+  };
 
   return {
     setShip,
@@ -302,13 +325,16 @@ export default function GameBoard(id) {
     getHitCellCoordinate,
     setShipDynamically,
     isAllShipSunk,
-    getAllCoordinate,
     getCoordinate,
     getBoard,
-    getIndexOfCoordinate,
+    getAllCoordinate,
+    getCoordinateIndex,
     getCellInOrderOfHit,
     getValidAdjacentIndex,
+    getValidAdjacentCoordinateInObj,
     getCoordinateOfShip,
     getID,
+    reset,
+    playAgain,
   };
 }

@@ -1,5 +1,3 @@
-import GameBoard from './gameBoard';
-
 export default function Player(playerOne, playerTwo) {
   const stack = [];
   const allCoordinate = playerTwo.getAllCoordinate();
@@ -25,46 +23,73 @@ export default function Player(playerOne, playerTwo) {
 
   const getCurrentBoardToAttack = () => boardToAttack;
 
-  const computerSendAttack = (coordinateIndex, coordinate, modeKey) => {
-    let isShipHit = playerOne.receiveAttack(coordinate) === 'hit';
+  const computerSendAttack = (coordinateObj, modeKey) => {
+    let isShipHit = playerOne.receiveAttack(coordinateObj.coordinate) === 'hit';
+
+    allCoordinate.splice(allCoordinate.indexOf(coordinateObj.coordinate), 1);
 
     if (isShipHit) {
-      const validAdjacentIndex = playerOne.getValidAdjacentIndex(coordinateIndex);
-      const computerValidAdjacentIndex = validAdjacentIndex.filter((index) =>
-        allCoordinate.includes(playerOne.getCoordinate(index)),
+      const arrOfCoordinate = stack.shift();
+
+      const ship = playerOne.getBoard()[coordinateObj.coordinateIndex].getShip();
+
+      const hit = ship.getHit();
+      const len = ship.len();
+
+      // When hit is 2 then the axis of the ship is certain, so filter the previous coordinate to target that axis
+      if (hit === 2 && len > 2) {
+        const coordAxisToTry = arrOfCoordinate.filter((coord) => coord.axis === coordinateObj.axis);
+
+        if (coordAxisToTry.length) {
+          stack.unshift(coordAxisToTry);
+        }
+      } else if (arrOfCoordinate) {
+        if (arrOfCoordinate.length) {
+          stack.unshift(arrOfCoordinate);
+        }
+      }
+
+      const ValidAdjacentCoordinateInObj = playerOne.getValidAdjacentCoordinateInObj(
+        coordinateObj.coordinateIndex,
       );
-      if (computerValidAdjacentIndex.length) stack.unshift(computerValidAdjacentIndex);
+
+      // Use the hit axis from previous attack to filter the next axis to attack
+      if (hit > 1 && hit < len) {
+        const coordAxisToTry = ValidAdjacentCoordinateInObj.filter(
+          (coord) => coord.axis === coordinateObj.axis,
+        );
+
+        if (coordAxisToTry.length) stack.unshift(coordAxisToTry);
+      } else {
+        if (ValidAdjacentCoordinateInObj.length) stack.unshift(ValidAdjacentCoordinateInObj);
+      }
+
       computerTurn(false, modeKey);
+    } else if (stack[0]) {
+      if (stack[0].length === 0) stack.shift();
     }
   };
 
-  const computerTurn = (specificCoordinate, modeKey = 'randomIndex') => {
-    let coordinate = specificCoordinate;
-    let coordinateIndex;
+  const computerTurn = (predictableCoordinateObj, modeKey = 'randomIndex') => {
+    let coordinateObj = predictableCoordinateObj;
 
     if (stack.length > 0) {
       // try adjacent slot
-      const arrOfCoordinateIndex = stack[0];
+      const coordinateToTry = stack[0];
 
       const mode = {
-        predictableIndex: arrOfCoordinateIndex.length - 1,
-        randomIndex: Math.floor(Math.random() * arrOfCoordinateIndex.length),
+        predictableIndex: () => coordinateToTry.length - 1,
+        randomIndex: () => Math.floor(Math.random() * coordinateToTry.length),
       };
+      coordinateObj = coordinateToTry.splice(mode[modeKey](), 1)[0];
+    } else if (!predictableCoordinateObj) {
+      const randomIndex = Math.floor(Math.random() * allCoordinate.length);
+      const coordinate = allCoordinate[randomIndex].toString();
+      const coordinateIndex = playerOne.getCoordinateIndex(coordinate);
 
-      coordinateIndex = arrOfCoordinateIndex.splice(mode[modeKey], 1)[0];
-      coordinate = playerOne.getBoard()[coordinateIndex].getCoordinate();
-
-      allCoordinate.splice(allCoordinate.indexOf(coordinate), 1);
-
-      if (!arrOfCoordinateIndex.length) stack.pop();
-    } else if (!specificCoordinate) {
-      coordinateIndex = Math.floor(Math.random() * allCoordinate.length);
-      coordinate = allCoordinate.splice(coordinateIndex, 1).toString();
-    } else {
-      coordinateIndex = playerTwo.getIndexOfCoordinate(specificCoordinate);
+      coordinateObj = { coordinate, coordinateIndex };
     }
-
-    computerSendAttack(coordinateIndex, coordinate, modeKey);
+    computerSendAttack(coordinateObj, modeKey);
   };
 
   const humanTurn = (coordinate) => {

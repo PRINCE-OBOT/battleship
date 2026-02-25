@@ -5,6 +5,9 @@ import GameBoard from './gameBoard';
 import Player from './player';
 
 const play = document.querySelector('[data-play]');
+const reset = document.querySelector('[data-reset]');
+const playAgain = document.querySelector('[data-play-again]');
+const winnerName = document.querySelector('[data-winner-name]');
 
 const formPlayerTwoName = document.querySelector('[data-form_player_two_name]');
 const player1Name = document.querySelector('[data-player1Name]');
@@ -166,9 +169,11 @@ function togglePlayer2Name() {
 }
 
 function Game() {
-  let player;
+  let player, gameStart;
 
   function start() {
+    if (gameStart) return;
+
     const inpCheckPlayer = document.querySelector('[data-inp_check_player]:checked');
     isGameBetweenHuman = inpCheckPlayer.id === 'computer' ? false : true;
 
@@ -178,7 +183,30 @@ function Game() {
     } else {
       player = Player(playerOne.board, playerTwo.board);
     }
+
+    gameStart = true;
   }
+
+  const unMarkHitCell = () => {
+    playerBoards.forEach((board) => {
+      [...board.children].forEach((cell) => cell.classList.remove('attackCell'));
+    });
+  };
+
+  function playAgain() {
+    gameStart = false;
+
+    if (isGameBetweenHuman) {
+      playerTwo.board.playAgain();
+    } else {
+      computer.board.playAgain();
+    }
+    playerOne.board.playAgain();
+    winnerName.innerHTML = '🎯';
+    unMarkHitCell();
+  }
+
+  function reset() {}
 
   const markPlayerOneHitCell = () => {
     playerOne.board.getHitCellCoordinate().forEach((coord) => {
@@ -209,11 +237,25 @@ function Game() {
     const coordinate = cell.dataset.coordinate;
     player.play(coordinate, id);
 
-    isGameBetweenHuman ? markPlayerTwoHitCell() : markComputerHitCell();
+    if (!isGameBetweenHuman) {
+      if (computer.board.isAllShipSunk()) {
+        winnerName.textContent = playerOne.name;
+      } else if (playerOne.board.isAllShipSunk()) {
+        winnerName.textContent = computer.name;
+      }
+      markComputerHitCell();
+    } else {
+      markPlayerTwoHitCell();
+      if (playerTwo.board.isAllShipSunk()) {
+        winnerName.textContent = playerOne.name;
+      } else if (playerOne.board.isAllShipSunk()) {
+        winnerName.textContent = playerTwo.name;
+      }
+    }
     markPlayerOneHitCell();
   }
 
-  return { start, attackShip };
+  return { start, playAgain, reset, attackShip };
 }
 
 const game = Game();
@@ -222,10 +264,12 @@ togglePlayer2Name();
 select_player2_or_computer.addEventListener('change', togglePlayer2Name);
 
 play.addEventListener('click', game.start);
+reset.addEventListener('click', game.reset);
+playAgain.addEventListener('click', game.playAgain);
 
 playerOneSelectShipBoard.addEventListener('click', shipSel.selectShip);
 playerOneBoard.addEventListener('click', setShip);
-playerOneBoard.addEventListener('click', game.attackShip);
+playerTwoBoard.addEventListener('click', game.attackShip);
 // playerTwoBoard.addEventListener('click', game.attackShip);
 document.addEventListener('click', () => {
   shipSel.unselectShip();

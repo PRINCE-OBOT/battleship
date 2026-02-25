@@ -184,9 +184,31 @@ main {
 }
 
 .hinge {
-  background-color: var(--pri-accent);
+  background-color: var(--transparent-black-lg);
   text-align: center;
-  padding: var(--sz-xxsm);
+  padding: var(--sz-xxsm) var(--sz-xsm);
+  display: grid;
+  grid-template-columns: max-content max-content 1fr max-content;
+  grid-template-rows: 1fr;
+  column-gap: var(--sz-sm);
+}
+
+.play,
+.reset,
+.play-again {
+  background-color: var(--transparent-black-xsm);
+  color: var(--white);
+  padding: var(--sz-xsm) var(--sz-sm);
+  border-radius: var(--sz-xsm);
+}
+
+.winner-name {
+  max-width: 160px;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: center;
+  padding-top: var(--sz-xsm);
 }
 
 .select_computer_or_player2 {
@@ -195,7 +217,7 @@ main {
 }
 
 .attackCell {
-  background: pink;
+  background: rgb(249, 5, 5) !important;
 }
 
 .check_player {

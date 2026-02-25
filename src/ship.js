@@ -20,7 +20,12 @@ export default function Ship(length, coordinate) {
 
   const getAxis = () => axis;
 
+  const reset = () => {
+    hitCount = 0;
+    axis = 'xAxis';
+  };
+
   const getCoordinate = () => coordinate;
 
-  return { hit, getHit, isSunk, len, getAxis, switchAxis, getCoordinate };
+  return { hit, getHit, reset, isSunk, len, getAxis, switchAxis, getCoordinate };
 }
