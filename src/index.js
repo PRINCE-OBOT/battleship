@@ -22,7 +22,7 @@ const playerOneSelectShipBoard = document.querySelector('[data-select-ship-board
 const playerTwoSelectShipBoard = document.querySelector('[data-select-ship-board="playerTwo"]');
 const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
 
-const selectShipDim = 300;
+const selectShipDim = 240;
 
 let isGameBetweenHuman = false;
 
@@ -78,7 +78,7 @@ const shipTemplates = [
   { len: 1, ind: 69, ship: shipImg2 },
 ];
 
-const createShipTem = () => {
+const createShipTemplate = () => {
   shipTemplates.forEach((shipTemplate) => {
     const img = document.createElement('img');
     const cell = [...playerOneSelectShipBoard.children][shipTemplate.ind];
@@ -143,8 +143,10 @@ function setShip(e) {
     const id = shipElem.id;
     const len = +shipElem.getAttribute('data-len');
 
-    const isShipSetOnBoard = board.setShip({ id, len }, coordinate);
-    if (isShipSetOnBoard) {
+    const isShipSet = board.setShip({ id, len }, coordinate);
+    if (isShipSet) {
+      const width = getComputedStyle(playerOneBoard).width;
+      shipElem.style.minWidth = `${(+width.replace(/[a-z]/gi, '') / 10) * len}px`;
       cell.append(shipElem);
     }
   }
@@ -239,7 +241,7 @@ function Game() {
     [...playerOneBoard.children].forEach(removeShip);
     [...[...selectShipBoards][0].children].forEach(removeShip);
     newRound();
-    createShipTem();
+    createShipTemplate();
   }
 
   const markPlayerOneHitCell = () => {
@@ -277,7 +279,7 @@ function Game() {
     const id = cell.closest('[data-player-board]').id;
     const coordinate = cell.dataset.coordinate;
 
-    player.play(coordinate, id);
+    const attackState = player.play(coordinate, id);
 
     if (!isGameBetweenHuman) {
       if (computer.board.isAllShipSunk()) {
@@ -306,7 +308,7 @@ function Game() {
 
 const game = Game();
 
-createShipTem();
+createShipTemplate();
 appendCellToBoard();
 togglePlayer2Name();
 

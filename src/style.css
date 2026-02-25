@@ -102,7 +102,7 @@ h6 {
   --sz-xlg: 30px;
   --sz-xxlg: 60px;
 
-  --bx-shadow: 0.5px 0.5px 5px var(--transparent-black-xsm);
+  --bx-shadow: 0.5px 0.5px 5px var(--transparent-black-lg);
 }
 
 body {
@@ -184,7 +184,7 @@ main {
 }
 
 .hinge {
-  background-color: var(--transparent-black-sm);
+  background-color: var(--pri-accent);
   text-align: center;
   padding: var(--sz-xxsm) var(--sz-xsm);
   display: grid;
@@ -196,10 +196,18 @@ main {
 .play,
 .reset,
 .play-again {
-  background-color: var(--transparent-black-xsm);
-  color: var(--white);
+  background-color: var(--transparent-white-lg);
+  color: var(--black);
+  display: flex;
+  align-items: center;
   padding: var(--sz-xsm) var(--sz-sm);
   border-radius: var(--sz-xsm);
+  box-shadow: var(--bx-shadow);
+  transition: 1000ms;
+
+  &:active {
+    scale: 0.8;
+  }
 }
 
 .winner-name {
@@ -208,7 +216,9 @@ main {
   text-overflow: ellipsis;
   overflow: hidden;
   text-align: center;
-  font-size: var(--sz-lg);
+  padding: var(--sz-sm);
+  color: var(--black);
+  font-weight: 900;
 }
 
 .select_computer_or_player2 {

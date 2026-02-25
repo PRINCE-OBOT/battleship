@@ -96,21 +96,30 @@ export default function Player(playerOne, playerTwo) {
     return playerTwo.receiveAttack(coordinate);
   };
 
+  const isBetweenHumanAndComputer = (coordinate, modeKey) => {
+    const attackState = humanTurn(coordinate);
+    if (attackState === 'miss') computerTurn(false, modeKey);
+    // false argument pass through `computerTurn` is used for testing the return of 'adjacentCoordinate'
+  };
+
+  const isBetweenHuman = (coordinate, id) => {
+    if (!isPlayerTurn(id)) return;
+
+    const attackState = getCurrentBoardToAttack().receiveAttack(coordinate);
+
+    if (attackState === 'miss') {
+      switchTurn();
+      switchBoard();
+    }
+  };
+
   const isPlayerTurn = (id) => getCurrentPlayerID() === id;
 
   const play = (coordinate, id, modeKey) => {
     if (playerTwo.getID() === 'computer') {
-      const result = humanTurn(coordinate);
-      if (result) {
-        computerTurn(false, modeKey);
-        return { result };
-      }
+      return isBetweenHumanAndComputer(coordinate, modeKey);
     } else {
-      if (!isPlayerTurn(id)) return;
-      getCurrentBoardToAttack().receiveAttack(coordinate);
-
-      switchTurn();
-      switchBoard();
+      return isBetweenHuman(coordinate, id);
     }
   };
 
