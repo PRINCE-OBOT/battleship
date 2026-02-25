@@ -41,9 +41,11 @@ const computer = {
   board: GameBoard('computer'),
 };
 
-const playerOneBoardID = playerOne.board.getID();
+const playerOneID = playerOne.board.getID();
+const playerTwoID = playerTwo.board.getID();
 
-playerOneBoard.id = playerOneBoardID;
+playerOneBoard.id = playerOneID;
+playerTwoBoard.id = playerTwoID;
 
 const appendCellToSelectShipBoard = (selectShip) => {
   let count = 0;
@@ -78,15 +80,15 @@ const shipTemplates = [
   { len: 1, ind: 69, ship: shipImg2 },
 ];
 
-const createShipTemplate = () => {
+const appendShipTemplateOnSelectBoard = (selectBoard, playerID) => {
   shipTemplates.forEach((shipTemplate) => {
-    const img = document.createElement('img');
-    const cell = [...playerOneSelectShipBoard.children][shipTemplate.ind];
+    const img = document.createElement('img').cloneNode(true);
+    const cell = [...selectBoard.children][shipTemplate.ind];
     img.classList.add('shipImg');
     img.setAttribute('data-len', shipTemplate.len);
     img.style.minWidth = `${(selectShipDim / 10) * shipTemplate.len}px`;
     img.src = shipTemplate.ship;
-    img.id = playerOneBoardID;
+    img.id = playerID;
     cell.append(img);
   });
 };
@@ -170,12 +172,41 @@ function setComputerShip() {
 const player2Tool = [formPlayerTwoName, playerTwoSelectShipBoard];
 
 function togglePlayer2Name() {
-  const inpCheckPlayer = document.querySelector('[data-inp_check_player]:checked');
+  const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
 
   if (inpCheckPlayer.id === 'computer') {
     player2Tool.forEach((tool) => tool.classList.add('hide'));
   } else player2Tool.forEach((tool) => tool.classList.remove('hide'));
 }
+
+const removeShip = (cellElem) => {
+  const ship = cellElem.querySelector('[data-len]');
+  const attackCellStatus = cellElem.querySelector('.attackCellStatus');
+  if (ship) ship.remove();
+  if (attackCellStatus) attackCellStatus.remove();
+};
+
+const resetPlayerTwoBoard = () => {
+  [...[...selectShipBoards][1].children].forEach(removeShip);
+  appendShipTemplateOnSelectBoard(playerTwoSelectShipBoard, playerTwoID);
+  [...playerTwoBoard.children].forEach(removeShip);
+};
+
+function handleResetPlayerTwoBoard(e) {
+  const checkPlayer = e.target.dataset.inpCheckPlayer;
+
+  if (!checkPlayer) return;
+
+  if (checkPlayer === 'computer') {
+    resetPlayerTwoBoard();
+  }
+  togglePlayer2Name();
+}
+
+const resetPlayerBoard = () => {
+  [...playerOneBoard.children].forEach(removeShip);
+  [...playerTwoBoard.children].forEach(removeShip);
+};
 
 function Game() {
   let player, gameStart, winner;
@@ -183,7 +214,7 @@ function Game() {
   function start() {
     if (gameStart) return;
 
-    const inpCheckPlayer = document.querySelector('[data-inp_check_player]:checked');
+    const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
     isGameBetweenHuman = inpCheckPlayer.id === 'computer' ? false : true;
 
     if (!isGameBetweenHuman) {
@@ -211,13 +242,6 @@ function Game() {
     unMarkHitCell();
   };
 
-  const removeShip = (cellElem) => {
-    const ship = cellElem.querySelector('[data-len]');
-    const attackCellStatus = cellElem.querySelector('.attackCellStatus');
-    if (ship) ship.remove();
-    if (attackCellStatus) attackCellStatus.remove();
-  };
-
   function playAgain() {
     gameStart = true;
 
@@ -233,18 +257,18 @@ function Game() {
   function reset() {
     if (isGameBetweenHuman) {
       playerTwo.board.reset();
-
-      [...[...selectShipBoards][1].children].forEach(removeShip);
+      resetPlayerTwoBoard();
     } else {
       computer.board.reset();
     }
     playerOne.board.reset();
-    [...playerOneBoard.children].forEach(removeShip);
-    [...playerTwoBoard.children].forEach(removeShip);
+
+    resetPlayerBoard();
 
     [...[...selectShipBoards][0].children].forEach(removeShip);
+
+    appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
     newRound();
-    createShipTemplate();
   }
 
   const markHitCell = (board, boardElem) => {
@@ -307,20 +331,27 @@ function Game() {
 
 const game = Game();
 
-createShipTemplate();
+appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
+appendShipTemplateOnSelectBoard(playerTwoSelectShipBoard, playerTwoID);
+
 appendCellToBoard();
 togglePlayer2Name();
 
-select_player2_or_computer.addEventListener('change', togglePlayer2Name);
+select_player2_or_computer.addEventListener('change', handleResetPlayerTwoBoard);
 
 play.addEventListener('click', game.start);
 reset.addEventListener('click', game.reset);
 playAgain.addEventListener('click', game.playAgain);
 
 playerOneSelectShipBoard.addEventListener('click', shipSel.selectShip);
+playerTwoSelectShipBoard.addEventListener('click', shipSel.selectShip);
+
 playerOneBoard.addEventListener('click', setShip);
+playerTwoBoard.addEventListener('click', setShip);
+
 playerTwoBoard.addEventListener('click', game.attackShip);
-// playerTwoBoard.addEventListener('click', game.attackShip);
+playerTwoBoard.addEventListener('click', game.attackShip);
+
 document.addEventListener('click', () => {
   shipSel.unselectShip();
 });
