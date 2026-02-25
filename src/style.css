@@ -153,7 +153,7 @@ main {
 
 .shipImg {
   position: absolute;
-  z-index: 100;
+  z-index: 99;
   bottom: 0;
   transform-origin: 0;
 }
@@ -181,6 +181,14 @@ main {
   min-width: calc(100% / 10);
   border: 1px solid var(--transparent-black-lg);
   position: relative;
+  display: flex;
+}
+
+.attackCellStatus {
+  position: absolute;
+  left: 20%;
+  top: 20%;
+  z-index: 100;
 }
 
 .hinge {
@@ -203,6 +211,7 @@ main {
   padding: var(--sz-xsm) var(--sz-sm);
   border-radius: var(--sz-xsm);
   box-shadow: var(--bx-shadow);
+  cursor: pointer;
   transition: 1000ms;
 
   &:active {
@@ -224,10 +233,6 @@ main {
 .select_computer_or_player2 {
   display: flex;
   column-gap: var(--sz-lg);
-}
-
-.attackCell {
-  background: rgb(249, 5, 5) !important;
 }
 
 .check_player {

@@ -213,7 +213,9 @@ function Game() {
 
   const removeShip = (cellElem) => {
     const ship = cellElem.querySelector('[data-len]');
+    const attackCellStatus = cellElem.querySelector('.attackCellStatus');
     if (ship) ship.remove();
+    if (attackCellStatus) attackCellStatus.remove();
   };
 
   function playAgain() {
@@ -231,7 +233,6 @@ function Game() {
   function reset() {
     if (isGameBetweenHuman) {
       playerTwo.board.reset();
-      [...playerTwoBoard.children].forEach(removeShip);
 
       [...[...selectShipBoards][1].children].forEach(removeShip);
     } else {
@@ -239,30 +240,27 @@ function Game() {
     }
     playerOne.board.reset();
     [...playerOneBoard.children].forEach(removeShip);
+    [...playerTwoBoard.children].forEach(removeShip);
+
     [...[...selectShipBoards][0].children].forEach(removeShip);
     newRound();
     createShipTemplate();
   }
 
-  const markPlayerOneHitCell = () => {
-    playerOne.board.getHitCellCoordinate().forEach((coord) => {
-      const cell = playerOneBoard.querySelector(`[data-coordinate='${coord}']`);
-      cell.classList.add('attackCell');
-    });
-  };
+  const markHitCell = (board, boardElem) => {
+    board
+      .getBoard()
+      .filter((cell) => cell.isCellHit())
+      .forEach((cell) => {
+        const coordinate = cell.getCoordinate();
+        const cellElem = boardElem.querySelector(`[data-coordinate='${coordinate}']`);
 
-  const markPlayerTwoHitCell = () => {
-    playerTwo.board.getHitCellCoordinate().forEach((coord) => {
-      const cell = playerTwoBoard.querySelector(`[data-coordinate='${coord}']`);
-      cell.classList.add('attackCell');
-    });
-  };
+        const attackCellStatus = document.createElement('div');
 
-  const markComputerHitCell = () => {
-    computer.board.getHitCellCoordinate().forEach((coord) => {
-      const cell = playerTwoBoard.querySelector(`[data-coordinate='${coord}']`);
-      cell.classList.add('attackCell');
-    });
+        attackCellStatus.classList.add('attackCellStatus');
+        attackCellStatus.innerHTML = cell.getShip() ? '💥' : '❌';
+        cellElem.append(attackCellStatus);
+      });
   };
 
   const displayWinnerName = (winner) => {
@@ -279,7 +277,9 @@ function Game() {
     const id = cell.closest('[data-player-board]').id;
     const coordinate = cell.dataset.coordinate;
 
-    const attackState = player.play(coordinate, id);
+    player.play(coordinate, id);
+
+    markHitCell(playerOne.board, playerOneBoard);
 
     if (!isGameBetweenHuman) {
       if (computer.board.isAllShipSunk()) {
@@ -288,9 +288,9 @@ function Game() {
         winner = computer.name;
       }
 
-      markComputerHitCell();
+      markHitCell(computer.board, playerTwoBoard);
     } else {
-      markPlayerTwoHitCell();
+      markHitCell(playerTwo.board, playerTwoBoard);
 
       if (playerTwo.board.isAllShipSunk()) {
         winner = playerOne.name;
@@ -300,7 +300,6 @@ function Game() {
     }
 
     displayWinnerName(winner);
-    markPlayerOneHitCell();
   }
 
   return { start, playAgain, reset, attackShip };
