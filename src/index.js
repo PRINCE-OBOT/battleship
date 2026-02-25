@@ -27,14 +27,17 @@ const selectShipDim = 300;
 let isGameBetweenHuman = false;
 
 const playerOne = {
+  name: 'Player 1',
   board: GameBoard(crypto.randomUUID()),
 };
 
 const playerTwo = {
+  name: 'Player 2',
   board: GameBoard(crypto.randomUUID()),
 };
 
 const computer = {
+  name: 'Grok',
   board: GameBoard('computer'),
 };
 
@@ -75,26 +78,30 @@ const shipTemplates = [
   { len: 1, ind: 69, ship: shipImg2 },
 ];
 
-shipTemplates.forEach((shipTemplate) => {
-  const img = document.createElement('img');
-  const cell = [...playerOneSelectShipBoard.children][shipTemplate.ind];
-  img.classList.add('shipImg');
-  img.setAttribute('data-len', shipTemplate.len);
-  img.style.minWidth = `${(selectShipDim / 10) * shipTemplate.len}px`;
-  img.src = shipTemplate.ship;
-  img.id = playerOneBoardID;
-  cell.append(img);
-});
-
-playerOne.board.getAllCoordinate().forEach((coordinate) => {
-  const cellElem = document.createElement('div');
-  cellElem.classList.add('player-board-cell');
-  playerBoards.forEach((board) => {
-    const cloneCell = cellElem.cloneNode(true);
-    cloneCell.setAttribute('data-coordinate', coordinate);
-    board.append(cloneCell);
+const createShipTem = () => {
+  shipTemplates.forEach((shipTemplate) => {
+    const img = document.createElement('img');
+    const cell = [...playerOneSelectShipBoard.children][shipTemplate.ind];
+    img.classList.add('shipImg');
+    img.setAttribute('data-len', shipTemplate.len);
+    img.style.minWidth = `${(selectShipDim / 10) * shipTemplate.len}px`;
+    img.src = shipTemplate.ship;
+    img.id = playerOneBoardID;
+    cell.append(img);
   });
-});
+};
+
+const appendCellToBoard = () => {
+  playerOne.board.getAllCoordinate().forEach((coordinate) => {
+    const cellElem = document.createElement('div');
+    cellElem.classList.add('player-board-cell');
+    playerBoards.forEach((board) => {
+      const cloneCell = cellElem.cloneNode(true);
+      cloneCell.setAttribute('data-coordinate', coordinate);
+      board.append(cloneCell);
+    });
+  });
+};
 
 function ShipSelection() {
   let selectedShip = null;
@@ -169,7 +176,7 @@ function togglePlayer2Name() {
 }
 
 function Game() {
-  let player, gameStart;
+  let player, gameStart, winner;
 
   function start() {
     if (gameStart) return;
@@ -184,6 +191,9 @@ function Game() {
       player = Player(playerOne.board, playerTwo.board);
     }
 
+    if (player1Name.value.trim() !== '') playerOne.name = player1Name.value;
+    if (player2Name.value.trim() !== '') playerTwo.name = player1Name.value;
+
     gameStart = true;
   }
 
@@ -193,8 +203,19 @@ function Game() {
     });
   };
 
+  const newRound = () => {
+    winner = false;
+    winnerName.innerHTML = '🎯';
+    unMarkHitCell();
+  };
+
+  const removeShip = (cellElem) => {
+    const ship = cellElem.querySelector('[data-len]');
+    if (ship) ship.remove();
+  };
+
   function playAgain() {
-    gameStart = false;
+    gameStart = true;
 
     if (isGameBetweenHuman) {
       playerTwo.board.playAgain();
@@ -202,11 +223,24 @@ function Game() {
       computer.board.playAgain();
     }
     playerOne.board.playAgain();
-    winnerName.innerHTML = '🎯';
-    unMarkHitCell();
+    newRound();
   }
 
-  function reset() {}
+  function reset() {
+    if (isGameBetweenHuman) {
+      playerTwo.board.reset();
+      [...playerTwoBoard.children].forEach(removeShip);
+
+      [...[...selectShipBoards][1].children].forEach(removeShip);
+    } else {
+      computer.board.reset();
+    }
+    playerOne.board.reset();
+    [...playerOneBoard.children].forEach(removeShip);
+    [...[...selectShipBoards][0].children].forEach(removeShip);
+    newRound();
+    createShipTem();
+  }
 
   const markPlayerOneHitCell = () => {
     playerOne.board.getHitCellCoordinate().forEach((coord) => {
@@ -229,29 +263,41 @@ function Game() {
     });
   };
 
+  const displayWinnerName = (winner) => {
+    if (winner) {
+      winnerName.textContent = `${winner} won`;
+      gameStart = false;
+    }
+  };
+
   function attackShip(e) {
-    if (!player) return;
+    if (!player || !gameStart) return;
 
     const cell = e.target;
     const id = cell.closest('[data-player-board]').id;
     const coordinate = cell.dataset.coordinate;
+
     player.play(coordinate, id);
 
     if (!isGameBetweenHuman) {
       if (computer.board.isAllShipSunk()) {
-        winnerName.textContent = playerOne.name;
+        winner = playerOne.name;
       } else if (playerOne.board.isAllShipSunk()) {
-        winnerName.textContent = computer.name;
+        winner = computer.name;
       }
+
       markComputerHitCell();
     } else {
       markPlayerTwoHitCell();
+
       if (playerTwo.board.isAllShipSunk()) {
-        winnerName.textContent = playerOne.name;
+        winner = playerOne.name;
       } else if (playerOne.board.isAllShipSunk()) {
-        winnerName.textContent = playerTwo.name;
+        winner = playerTwo.name;
       }
     }
+
+    displayWinnerName(winner);
     markPlayerOneHitCell();
   }
 
@@ -260,7 +306,10 @@ function Game() {
 
 const game = Game();
 
+createShipTem();
+appendCellToBoard();
 togglePlayer2Name();
+
 select_player2_or_computer.addEventListener('change', togglePlayer2Name);
 
 play.addEventListener('click', game.start);

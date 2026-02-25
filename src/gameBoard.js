@@ -194,6 +194,8 @@ export default function GameBoard(id) {
     const coordinateIndex = getCoordinateIndex(coordinate);
     const cell = board[coordinateIndex];
 
+    if (!cell) return;
+
     if (!cell.isCellHit()) {
       cellInOrderOfHit.push(coordinate);
       cell.hitCell();
@@ -305,7 +307,14 @@ export default function GameBoard(id) {
   const getHitCellCoordinate = () =>
     board.filter((cell) => cell.isCellHit()).map((cell) => cell.getCoordinate());
 
-  const reset = () => {};
+  const reset = () => {
+    playAgain();
+    board.forEach((cell) => {
+      if (cell) {
+        cell.removeShip();
+      }
+    });
+  };
 
   const playAgain = () => {
     board.forEach((cell) => {

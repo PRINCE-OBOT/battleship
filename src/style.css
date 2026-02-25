@@ -184,7 +184,7 @@ main {
 }
 
 .hinge {
-  background-color: var(--transparent-black-lg);
+  background-color: var(--transparent-black-sm);
   text-align: center;
   padding: var(--sz-xxsm) var(--sz-xsm);
   display: grid;
@@ -203,12 +203,12 @@ main {
 }
 
 .winner-name {
-  max-width: 160px;
+  max-width: 100px;
   text-wrap: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   text-align: center;
-  padding-top: var(--sz-xsm);
+  font-size: var(--sz-lg);
 }
 
 .select_computer_or_player2 {
