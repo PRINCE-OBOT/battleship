@@ -9,7 +9,6 @@ const reset = document.querySelector('[data-reset]');
 const playAgain = document.querySelector('[data-play-again]');
 const winnerName = document.querySelector('[data-winner-name]');
 
-const formPlayerTwoName = document.querySelector('[data-form_player_two_name]');
 const player1Name = document.querySelector('[data-player1Name]');
 const player2Name = document.querySelector('[data-player2Name]');
 
@@ -143,6 +142,8 @@ function togglePlayer2SelectShipBoard() {
   if (inpCheckPlayer.id === 'computer') {
     playerTwoSelectShipBoard.classList.add('hide');
   } else playerTwoSelectShipBoard.classList.remove('hide');
+
+  game.reset();
 }
 
 const removeShip = (cellElem) => {
@@ -201,6 +202,14 @@ const makePointerNone = (cellElem) => {
   cellElem.querySelector('[data-len]').classList.add('pointerEventNone');
 };
 
+const makeInpReadOnly = () => {
+  [player1Name, player2Name].forEach((name) => (name.readOnly = true));
+};
+
+const makeReadOnlyFromInp = () => {
+  [player1Name, player2Name].forEach((name) => (name.readOnly = false));
+};
+
 function Game() {
   let isBtw, player, winner, gameStart;
 
@@ -212,15 +221,15 @@ function Game() {
 
       markHitCell(cell, attackState);
 
-      if (computer.board.isAllShipSunk()) {
-        winner = playerOne.name;
-        return;
-      }
-
       if (attackState === 'miss') {
         const isAllShipSunk = player.computerTurn(false, 'randomIndex', computerTurnCb);
         if (isAllShipSunk === 'allSunk') {
-          winner = computer.name;
+          winner = player.getPlayerTwoName();
+          return;
+        }
+      } else {
+        if (computer.board.isAllShipSunk()) {
+          winner = player.getPlayerOneName();
           return;
         }
       }
@@ -272,8 +281,9 @@ function Game() {
   };
 
   function start() {
-    // if (gameStart) return;
+    if (gameStart) return;
 
+    makeInpReadOnly();
     const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
 
     const playerInfo = {
@@ -331,6 +341,7 @@ function Game() {
     removeAttackCellMark();
     removeShipFromPlayerOneBoard();
     resetSelectShipBoardOne();
+    makeReadOnlyFromInp();
     newRound();
   }
 
@@ -351,6 +362,10 @@ function Game() {
 
   const computerTurnCb = (coordinate, attackState) => {
     const cell = playerOneBoard.querySelector(`[data-coordinate="${coordinate}"]`);
+
+    if (attackState === 'miss') {
+    } else {
+    }
     markHitCell(cell, attackState);
   };
 

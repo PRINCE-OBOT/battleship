@@ -122,6 +122,7 @@ main {
   flex-direction: column;
   row-gap: var(--sz-sm);
   align-items: center;
+  padding: var(--sz-lg) 0;
 }
 
 .human {
@@ -169,6 +170,18 @@ main {
 .inp_playerName {
   border-radius: var(--sz-xsm);
   padding: var(--sz-xsm);
+  border: none;
+  box-shadow: var(--bx-shadow);
+
+  &:read-only {
+    opacity: 0.8;
+    background: var(--transparent-black-lg);
+    color: var(--black);
+  }
+
+  &:focus {
+    outline-color: var(--pri-accent);
+  }
 }
 
 .submit-playerName {

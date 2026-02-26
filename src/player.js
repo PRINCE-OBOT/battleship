@@ -105,6 +105,10 @@ export default function Player({ playerOne, playerOneName, playerTwo, playerTwoN
     return playerTwo.receiveAttack(coordinate);
   };
 
+  const getPlayerOneName = () => playerOneName;
+
+  const getPlayerTwoName = () => playerTwoName;
+
   return {
     humanTurn,
     computerTurn,
@@ -114,5 +118,7 @@ export default function Player({ playerOne, playerOneName, playerTwo, playerTwoN
     getCurrentBoardToAttack,
     getCurPlayerName,
     getCurrentBoardID,
+    getPlayerOneName,
+    getPlayerTwoName,
   };
 }
