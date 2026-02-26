@@ -109,10 +109,10 @@ h6 {
 body {
   font-family: Roboto, arial;
   font-size: clamp(var(--sz-sm), var(--sz-sm) + 0.5vw, var(--sz-sm) + var(--sz-xsm));
-  background: var(--ter-accent);
   color: var(--white);
   position: relative;
   perspective: 300px;
+  background: var(--ter-accent);
 }
 
 .container {
@@ -159,6 +159,10 @@ main {
   transform: scale(0.2);
 }
 
+.howToSetShipInstruction {
+  color: var(--transparent-white-xsm);
+}
+
 .human {
   font-weight: 900;
 }
@@ -177,6 +181,8 @@ main {
   position: absolute;
   color: var(--black);
   transform: translateX(-50%);
+  text-wrap: nowrap;
+  cursor: pointer;
 }
 
 .toggle-player-one-ship {

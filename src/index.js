@@ -30,6 +30,7 @@ const playerTwoSelectShipBoard = document.querySelector('[data-select-ship-board
 const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
 const pirateShipImg = document.createElement('img');
 const sailingShipImg = document.createElement('img');
+const bgPatternImg = document.createElement('img');
 
 const selectShipDim = 240;
 
@@ -363,6 +364,8 @@ function Game() {
       playerInfo.playerTwo = computer.board;
       playerInfo.playerTwoName = 'Grok';
 
+      if (player1Name.value.trim() !== '') playerInfo.playerOneName = player1Name.value;
+
       if (!playerOne.board.isAllShipSet()) {
         togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
         return;
@@ -386,7 +389,6 @@ function Game() {
       [...playerTwoBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
     }
 
-    if (player1Name.value.trim() !== '') playerInfo.playerOneName = player1Name.value;
     if (player2Name.value.trim() !== '') playerInfo.playerTwoName = player2Name.value;
 
     player = Player(playerInfo);
