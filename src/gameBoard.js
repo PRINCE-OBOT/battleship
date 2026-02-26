@@ -36,6 +36,7 @@ export default function GameBoard(id) {
   const yAxis = ['j', 'i', 'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
   const xAxis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   const cellInOrderOfHit = [];
+  const ALL_SHIP_LEN = 20;
 
   let hitCoordinate;
 
@@ -285,9 +286,11 @@ export default function GameBoard(id) {
       }
     }
 
-    [...getCoordinateOfShip()].slice(2).forEach((coordinate) => {
-      switchShipAxis(coordinate);
-    });
+    getCoordinateOfShip()
+      .slice(2)
+      .forEach((coordinate) => {
+        switchShipAxis(coordinate);
+      });
   };
 
   const isAllShipSunk = () => {
@@ -295,8 +298,11 @@ export default function GameBoard(id) {
     return cellWithShip.every((cell) => cell.getShip().isSunk());
   };
 
-  const getCoordinateOfShip = () =>
-    new Set(board.filter((cell) => cell.getShip()).map((cell) => cell.getShip().getCoordinate()));
+  const filterAllShip = () => {
+    return [...new Set(board.filter((cell) => cell.getShip()).map((cell) => cell.getShip()))];
+  };
+
+  const getCoordinateOfShip = () => filterAllShip().map((ship) => ship.getCoordinate());
 
   const getBoard = () => board;
 
@@ -330,6 +336,9 @@ export default function GameBoard(id) {
     });
   };
 
+  const isAllShipSet = () =>
+    filterAllShip().reduce((curLen, ship) => curLen + ship.len(), 0) === ALL_SHIP_LEN;
+
   const getHitCoordinate = () => hitCoordinate;
 
   return {
@@ -349,6 +358,7 @@ export default function GameBoard(id) {
     getValidAdjacentIndex,
     getValidAdjacentCoordinateInObj,
     getCoordinateOfShip,
+    isAllShipSet,
     getID,
     reset,
     playAgain,

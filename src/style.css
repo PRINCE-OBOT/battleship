@@ -130,6 +130,12 @@ main {
   padding: var(--sz-lg) 0;
 }
 
+.game-title {
+  font-family: Pacifico, Arial, Helvetica, sans-serif;
+  color: var(--transparent-white-xsm);
+  align-self: flex-end;
+}
+
 @keyframes toAndFro {
   0% {
     transform: translateX(-100%);
@@ -148,8 +154,8 @@ main {
 
 .sailingShip {
   position: absolute;
-  opacity: 0;
-  top: -300px;
+  opacity: 0.2;
+  top: -400px;
   right: -130px;
   transform: scale(0.2);
 }
@@ -192,7 +198,7 @@ main {
 
 .shipImg {
   position: absolute;
-  z-index: 99;
+  z-index: 90;
   bottom: 0;
   transform-origin: 0;
 }
@@ -244,7 +250,7 @@ main {
   position: absolute;
   left: 20%;
   top: 20%;
-  z-index: 100;
+  z-index: 99;
 }
 
 .hinge {
@@ -260,17 +266,19 @@ main {
 
 .playerMsg {
   position: absolute;
-  background: var(--transparent-black-lg);
+  background: var(--black);
   padding: var(--sz-xsm);
   border-radius: var(--sz-xsm);
   color: var(--error);
   transform: translateX(-50%) scale(1);
   transition: 300ms;
+  box-shadow: var(--bx-shadow);
 
   max-width: 200px;
   overflow: hidden;
   text-wrap: nowrap;
   text-overflow: ellipsis;
+  z-index: 100;
 }
 
 .playerOneMsg {

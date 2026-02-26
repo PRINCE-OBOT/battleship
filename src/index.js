@@ -228,8 +228,19 @@ const makeReadOnlyFromInp = () => {
   [player1Name, player2Name].forEach((name) => (name.readOnly = false));
 };
 
-const scaleTo0 = (playerMsg) => {
-  playerMsg.classList.toggle('scaleTo0');
+const togglePlayerMsg = (playerMsg) => {
+  playerMsg.classList.remove('scaleTo0');
+  setTimeout(() => playerMsg.classList.add('scaleTo0'), 2000);
+};
+
+const togglePlayerOneMsg = (msg) => {
+  playerOneMsg.textContent = msg;
+  togglePlayerMsg(playerOneMsg);
+};
+
+const togglePlayerTwoMsg = (msg) => {
+  playerTwoMsg.textContent = msg;
+  togglePlayerMsg(playerTwoMsg);
 };
 
 function Game() {
@@ -239,7 +250,10 @@ function Game() {
     attackShip(cell, coordinate) {
       let attackState = player.humanTurn(coordinate);
 
-      if (!attackState) return;
+      if (!attackState) {
+        togglePlayerOneMsg('Already hit');
+        return;
+      }
 
       markHitCell(cell, attackState);
 
@@ -276,7 +290,14 @@ function Game() {
       const currentBoardAttack = player.getCurrentBoardToAttack();
       const attackState = currentBoardAttack.receiveAttack(coordinate);
 
-      if (!attackState) return;
+      if (!attackState) {
+        if (playerOneID === boardID) {
+          togglePlayerOneMsg('Already hit');
+        } else {
+          togglePlayerTwoMsg('Already hit');
+        }
+        return;
+      }
 
       markHitCell(cell, attackState);
 
@@ -318,12 +339,26 @@ function Game() {
       playerInfo.playerTwo = computer.board;
       playerInfo.playerTwoName = 'Grok';
 
+      if (!playerOne.board.isAllShipSet()) {
+        togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
+        return;
+      }
+
       setComputerShip();
     } else {
       isBtw = humanAndHuman;
 
       playerInfo.playerTwo = playerTwo.board;
       playerInfo.playerTwoName = 'Player 2';
+
+      if (!playerOne.board.isAllShipSet()) {
+        togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
+        return;
+      } else if (!playerTwo.board.isAllShipSet()) {
+        togglePlayerTwoMsg(`${playerInfo.playerTwoName} set all your Ship`);
+        return;
+      }
+
       [...playerTwoBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
     }
 
@@ -339,6 +374,7 @@ function Game() {
 
   const resetBoard = () => {
     winner = false;
+    gameStart = false;
     winnerName.innerHTML = '🎯';
     removeAttackCellMark();
   };
@@ -428,15 +464,11 @@ function Game() {
         shipElem.style.minWidth = `${(+width.replace(/[a-z]/gi, '') / 10) * len}px`;
         cell.append(shipElem);
       } else {
-        let playerMsg;
         if (id === playerOneID) {
-          playerMsg = playerOneMsg;
+          togglePlayerOneMsg('Invalid Position');
         } else {
-          playerMsg = playerTwoMsg;
+          togglePlayerTwoMsg('Invalid Position');
         }
-        playerMsg.textContent = 'Invalid Position';
-        scaleTo0(playerMsg);
-        setTimeout(() => scaleTo0(playerMsg), 2000);
       }
     }
   }
