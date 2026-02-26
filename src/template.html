@@ -11,7 +11,7 @@
         <h1 class="game-title">Battleship</h1>
         <div class="select-ship player-1-select-ship" data-select-ship-board="playerOne"></div>
 
-        <form action="" class="name-selection" data-form_player_one_name>
+        <div class="name-selection" data-form_player_one_name>
           <label for="player1Name">Board 1:</label>
           <input
             type="text"
@@ -20,7 +20,7 @@
             data-player1Name
             id="player1Name"
           />
-        </form>
+        </div>
 
         <div class="human">Human</div>
 
@@ -28,11 +28,14 @@
           <div class="player-board player-1-board" data-player-board="one"></div>
 
           <div class="hinge" data-hinge>
+            <div class="playerMsg playerOneMsg scaleTo0" data-player-one-msg>Msg</div>
             <div class="play" data-play>▶️</div>
             <div class="play-again" data-play-again>&#128257; Again</div>
             <div class="winner-name" data-winner-name>🎯</div>
             <div class="reset" data-reset>&#128260; Reset</div>
+            <div class="playerMsg playerTwoMsg scaleTo0" data-player-two-msg>Msg</div>
           </div>
+
           <div class="player-board player-2-board" data-player-board="two"></div>
         </div>
 
@@ -54,7 +57,7 @@
           </div>
         </form>
 
-        <form class="name-selection" class="player2NameSection" data-form_player_two_name>
+        <div class="name-selection" class="player2NameSection" data-form_player_two_name>
           <label for="player2Name">Board 2:</label>
           <input
             type="text"
@@ -63,7 +66,7 @@
             data-player2Name
             id="player2Name"
           />
-        </form>
+        </div>
 
         <div class="select-ship player-2-select-ship" data-select-ship-board="playerTwo"></div>
       </main>

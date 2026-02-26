@@ -1,6 +1,8 @@
 import './style.css';
 import shipImg1 from './imgs/ship_len3.svg';
 import shipImg2 from './imgs/ship_len2.svg';
+import pirateShip from './imgs/pirate_ship.svg';
+import sailingShip from './imgs/sailingShip.svg';
 import GameBoard from './gameBoard';
 import Player from './player';
 
@@ -8,6 +10,9 @@ const play = document.querySelector('[data-play]');
 const reset = document.querySelector('[data-reset]');
 const playAgain = document.querySelector('[data-play-again]');
 const winnerName = document.querySelector('[data-winner-name]');
+
+const playerOneMsg = document.querySelector('[data-player-one-msg]');
+const playerTwoMsg = document.querySelector('[data-player-two-msg]');
 
 const player1Name = document.querySelector('[data-player1Name]');
 const player2Name = document.querySelector('[data-player2Name]');
@@ -20,6 +25,8 @@ const select_player2_or_computer = document.querySelector('[data-select_computer
 const playerOneSelectShipBoard = document.querySelector('[data-select-ship-board="playerOne"]');
 const playerTwoSelectShipBoard = document.querySelector('[data-select-ship-board="playerTwo"]');
 const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
+const pirateShipImg = document.createElement('img');
+const sailingShipImg = document.createElement('img');
 
 const selectShipDim = 240;
 
@@ -40,6 +47,17 @@ const playerTwoID = playerTwo.board.getID();
 
 playerOneBoard.id = playerOneID;
 playerTwoBoard.id = playerTwoID;
+
+const setImgBackgroundToBody = () => {
+  const body = document.body;
+  pirateShipImg.classList.add('pirateShip');
+  sailingShipImg.classList.add('sailingShip');
+
+  pirateShipImg.src = pirateShip;
+  sailingShipImg.src = sailingShip;
+
+  body.append(pirateShipImg, sailingShipImg);
+};
 
 const appendCellToSelectShipBoard = (selectShip) => {
   let count = 0;
@@ -210,6 +228,10 @@ const makeReadOnlyFromInp = () => {
   [player1Name, player2Name].forEach((name) => (name.readOnly = false));
 };
 
+const scaleTo0 = (playerMsg) => {
+  playerMsg.classList.toggle('scaleTo0');
+};
+
 function Game() {
   let isBtw, player, winner, gameStart;
 
@@ -315,7 +337,7 @@ function Game() {
     gameStart = true;
   }
 
-  const newRound = () => {
+  const resetBoard = () => {
     winner = false;
     winnerName.innerHTML = '🎯';
     removeAttackCellMark();
@@ -329,7 +351,8 @@ function Game() {
     isBtw.playAgain();
     playerOne.board.playAgain();
     removeAttackCellMark();
-    newRound();
+    winnerName.textContent = 'Game Ongoing';
+    resetBoard();
   }
 
   function reset() {
@@ -342,7 +365,7 @@ function Game() {
     removeShipFromPlayerOneBoard();
     resetSelectShipBoardOne();
     makeReadOnlyFromInp();
-    newRound();
+    resetBoard();
   }
 
   const markHitCell = (cellElem, attackState) => {
@@ -404,6 +427,16 @@ function Game() {
         const width = getComputedStyle(playerOneBoard).width;
         shipElem.style.minWidth = `${(+width.replace(/[a-z]/gi, '') / 10) * len}px`;
         cell.append(shipElem);
+      } else {
+        let playerMsg;
+        if (id === playerOneID) {
+          playerMsg = playerOneMsg;
+        } else {
+          playerMsg = playerTwoMsg;
+        }
+        playerMsg.textContent = 'Invalid Position';
+        scaleTo0(playerMsg);
+        setTimeout(() => scaleTo0(playerMsg), 2000);
       }
     }
   }
@@ -416,6 +449,7 @@ const game = Game();
 appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
 appendShipTemplateOnSelectBoard(playerTwoSelectShipBoard, playerTwoID);
 
+setImgBackgroundToBody();
 appendCellToBoard();
 togglePlayer2SelectShipBoard();
 
