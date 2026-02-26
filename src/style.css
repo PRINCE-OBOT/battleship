@@ -81,7 +81,7 @@ h6 {
 :root {
   --pri-accent: rgb(217, 176, 13);
   --sec-accent: rgb(131, 127, 83);
-  --ter-accent: rgb(73, 84, 68);
+  --ter-accent: rgb(60, 70, 4);
   --white: rgb(255, 255, 255);
   --black: rgb(0, 0, 0);
   --error-transparent: rgba(249, 12, 12, 0.2);
@@ -165,10 +165,12 @@ main {
 }
 
 .boards-section {
-  display: flex;
-  flex-direction: column;
   border: var(--sz-lg) solid var(--pri-accent);
   box-shadow: var(--bx-shadow);
+  height: 640px;
+  min-width: 320px;
+  display: grid;
+  grid-template-rows: 1fr max-content 1fr;
 }
 
 .select-ship {
@@ -232,8 +234,7 @@ main {
 .player-board {
   display: flex;
   flex-wrap: wrap;
-  min-height: 310px;
-  min-width: 310px;
+
   border: var(--sz-xxsm) solid var(--transparent-black-lg);
   background: var(--white);
 }
@@ -270,6 +271,7 @@ main {
   padding: var(--sz-xsm);
   border-radius: var(--sz-xsm);
   color: var(--error);
+  font-weight: 900;
   transform: translateX(-50%) scale(1);
   transition: 300ms;
   box-shadow: var(--bx-shadow);
@@ -346,6 +348,9 @@ main {
   background-color: var(--transparent-black-lg);
 }
 
+/* 
+Visualize computer ship
+
 .player-2-board {
   [data-len='1'] {
     background: rgb(27, 71, 85);
@@ -359,4 +364,4 @@ main {
   [data-len='4'] {
     background: rgb(202, 8, 199);
   }
-}
+} */

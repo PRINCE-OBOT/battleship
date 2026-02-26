@@ -9,7 +9,7 @@ import Player from './player';
 const play = document.querySelector('[data-play]');
 const reset = document.querySelector('[data-reset]');
 const playAgain = document.querySelector('[data-play-again]');
-const winnerName = document.querySelector('[data-winner-name]');
+const generalMsg = document.querySelector('[data-winner-name]');
 
 const playerOneMsg = document.querySelector('[data-player-one-msg]');
 const playerTwoMsg = document.querySelector('[data-player-two-msg]');
@@ -243,21 +243,34 @@ const togglePlayerTwoMsg = (msg) => {
   togglePlayerMsg(playerTwoMsg);
 };
 
+const setPlayerTurnMsg = (msg) => {
+  generalMsg.textContent = `${msg} turn`;
+};
+
 function Game() {
   let isBtw, player, winner, gameStart;
 
+  const playerInfo = {
+    playerOne: playerOne.board,
+    playerOneName: 'Player 1',
+  };
+
   const humanAndComputer = {
     attackShip(cell, coordinate) {
+      const boardElemID = cell.closest('[data-player-board]').id;
+
+      if (boardElemID === playerOneID) return;
+
       let attackState = player.humanTurn(coordinate);
 
       if (!attackState) {
         togglePlayerOneMsg('Already hit');
         return;
       }
-
       markHitCell(cell, attackState);
 
       if (attackState === 'miss') {
+        setPlayerTurnMsg(player.getPlayerTwoName());
         const isAllShipSunk = player.computerTurn(false, 'randomIndex', computerTurnCb);
         if (isAllShipSunk === 'allSunk') {
           winner = player.getPlayerTwoName();
@@ -305,6 +318,7 @@ function Game() {
         player.switchBoardID();
         player.switchBoard();
         player.switchPlayerName();
+        setPlayerTurnMsg(player.getCurPlayerName());
       } else {
         if (currentBoardAttack.isAllShipSunk()) {
           winner = player.getCurPlayerName();
@@ -329,20 +343,15 @@ function Game() {
     makeInpReadOnly();
     const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
 
-    const playerInfo = {
-      playerOne: playerOne.board,
-      playerOneName: 'Player 1',
-    };
-
     if (inpCheckPlayer.id === 'computer') {
       isBtw = humanAndComputer;
       playerInfo.playerTwo = computer.board;
       playerInfo.playerTwoName = 'Grok';
 
-      if (!playerOne.board.isAllShipSet()) {
-        togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
-        return;
-      }
+      // if (!playerOne.board.isAllShipSet()) {
+      //   togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
+      //   return;
+      // }
 
       setComputerShip();
     } else {
@@ -368,14 +377,14 @@ function Game() {
     player = Player(playerInfo);
 
     [...playerOneBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
-    winnerName.textContent = 'Game Ongoing';
+    setPlayerTurnMsg(player.getPlayerOneName());
     gameStart = true;
   }
 
   const resetBoard = () => {
     winner = false;
     gameStart = false;
-    winnerName.innerHTML = '🎯';
+    generalMsg.innerHTML = '🎯';
     removeAttackCellMark();
   };
 
@@ -387,7 +396,7 @@ function Game() {
     isBtw.playAgain();
     playerOne.board.playAgain();
     removeAttackCellMark();
-    winnerName.textContent = 'Game Ongoing';
+    generalMsg.textContent = 'Game Ongoing';
     resetBoard();
   }
 
@@ -412,9 +421,9 @@ function Game() {
     cellElem.append(attackCellStatus);
   };
 
-  const displayWinnerName = (winner) => {
+  const displayWinnerMsg = (winner) => {
     if (winner) {
-      winnerName.textContent = `${winner} won`;
+      generalMsg.textContent = `${winner} won`;
       gameStart = false;
     }
   };
@@ -423,7 +432,7 @@ function Game() {
     const cell = playerOneBoard.querySelector(`[data-coordinate="${coordinate}"]`);
 
     if (attackState === 'miss') {
-    } else {
+      setPlayerTurnMsg(player.getPlayerOneName());
     }
     markHitCell(cell, attackState);
   };
@@ -435,7 +444,7 @@ function Game() {
     const coordinate = cell.dataset.coordinate;
 
     isBtw.attackShip(cell, coordinate);
-    displayWinnerName(winner);
+    displayWinnerMsg(winner);
   }
 
   function setShip(e) {
