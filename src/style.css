@@ -133,7 +133,6 @@ main {
 .game-title {
   font-family: Pacifico, Arial, Helvetica, sans-serif;
   color: var(--transparent-white-xsm);
-  align-self: flex-end;
 }
 
 @keyframes toAndFro {
@@ -171,6 +170,24 @@ main {
   min-width: 320px;
   display: grid;
   grid-template-rows: 1fr max-content 1fr;
+  position: relative;
+}
+
+.hide-player-ship {
+  position: absolute;
+  color: var(--black);
+  transform: translateX(-50%);
+}
+
+.toggle-player-one-ship {
+  top: 0;
+  left: 50%;
+  top: -20px;
+}
+
+.toggle-player-two-ship {
+  bottom: -20px;
+  left: 50%;
 }
 
 .select-ship {
@@ -343,6 +360,10 @@ main {
 
 .hide {
   display: none;
+}
+
+.visibilityHidden {
+  visibility: hidden;
 }
 .bgColor {
   background-color: var(--transparent-black-lg);

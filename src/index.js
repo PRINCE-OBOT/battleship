@@ -11,6 +11,9 @@ const reset = document.querySelector('[data-reset]');
 const playAgain = document.querySelector('[data-play-again]');
 const generalMsg = document.querySelector('[data-winner-name]');
 
+const togglePlayerOneShip = document.querySelector('[data-toggle-player-one-ship]');
+const togglePlayerTwoShip = document.querySelector('[data-toggle-player-two-ship]');
+
 const playerOneMsg = document.querySelector('[data-player-one-msg]');
 const playerTwoMsg = document.querySelector('[data-player-two-msg]');
 
@@ -116,6 +119,18 @@ const appendCellToBoard = () => {
     });
   });
 };
+
+function toggleShipDisplay(board) {
+  board.querySelectorAll('[data-len]').forEach((ship) => ship.classList.toggle('visibilityHidden'));
+}
+
+function handleTogglePlayerOneShip() {
+  toggleShipDisplay(playerOneBoard);
+}
+
+function handleTogglePlayerTwoShip() {
+  toggleShipDisplay(playerTwoBoard);
+}
 
 function ShipSelection() {
   let selectedShip = null;
@@ -348,10 +363,10 @@ function Game() {
       playerInfo.playerTwo = computer.board;
       playerInfo.playerTwoName = 'Grok';
 
-      // if (!playerOne.board.isAllShipSet()) {
-      //   togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
-      //   return;
-      // }
+      if (!playerOne.board.isAllShipSet()) {
+        togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
+        return;
+      }
 
       setComputerShip();
     } else {
@@ -508,6 +523,9 @@ playerTwoBoard.addEventListener('click', game.setShip);
 
 playerOneBoard.addEventListener('click', game.attackShip);
 playerTwoBoard.addEventListener('click', game.attackShip);
+
+togglePlayerOneShip.addEventListener('click', handleTogglePlayerOneShip);
+togglePlayerTwoShip.addEventListener('click', handleTogglePlayerTwoShip);
 
 document.addEventListener('click', () => {
   shipSel.unselectShip();
