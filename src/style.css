@@ -120,8 +120,12 @@ body {
 main {
   display: flex;
   flex-direction: column;
-  row-gap: var(--sz-lg);
+  row-gap: var(--sz-sm);
   align-items: center;
+}
+
+.human {
+  font-weight: 900;
 }
 
 .boards-section {
@@ -156,6 +160,10 @@ main {
   z-index: 99;
   bottom: 0;
   transform-origin: 0;
+}
+
+.pointerEventNone {
+  pointer-events: none;
 }
 
 .inp_playerName {

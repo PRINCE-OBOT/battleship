@@ -1,30 +1,38 @@
-export default function Player(playerOne, playerTwo) {
+export default function Player({ playerOne, playerOneName, playerTwo, playerTwoName }) {
   const stack = [];
   const allCoordinate = playerTwo.getAllCoordinate();
 
   const playerOneID = playerOne.getID();
   const playerTwoID = playerTwo.getID();
 
-  const playerOneGridBoard = playerOne.getBoard();
-  const playerTwoGridBoard = playerTwo.getBoard();
+  let playerID = playerTwoID;
+  let boardToAttack = playerTwo;
+  let playerName = playerOneName;
 
-  let playerID = playerOneID;
-  let boardToAttack = playerTwoGridBoard;
+  const switchPlayerName = () => {
+    playerName = playerName === playerOneName ? playerTwoName : playerOneName;
+  };
 
-  const switchTurn = () => {
-    playerID = playerID === playerOneID ? playerTwoID : playerOneID;
+  const switchBoardID = () => {
+    playerID = playerID === playerTwoID ? playerOneID : playerTwoID;
   };
 
   const switchBoard = () => {
-    boardToAttack = boardToAttack === playerTwoGridBoard ? playerOneGridBoard : playerTwoGridBoard;
+    boardToAttack = boardToAttack === playerTwo ? playerOne : playerTwo;
   };
 
-  const getCurrentPlayerID = () => playerID;
+  const getCurrentBoardID = () => playerID;
+
+  const getCurPlayerName = () => playerName;
 
   const getCurrentBoardToAttack = () => boardToAttack;
 
-  const computerSendAttack = (coordinateObj, modeKey) => {
+  const computerSendAttack = (coordinateObj, modeKey, computerTurnCb) => {
     let isShipHit = playerOne.receiveAttack(coordinateObj.coordinate) === 'hit';
+
+    const attackState = isShipHit ? 'hit' : 'miss';
+
+    computerTurnCb(coordinateObj.coordinate, attackState);
 
     allCoordinate.splice(allCoordinate.indexOf(coordinateObj.coordinate), 1);
 
@@ -64,13 +72,14 @@ export default function Player(playerOne, playerTwo) {
         if (ValidAdjacentCoordinateInObj.length) stack.unshift(ValidAdjacentCoordinateInObj);
       }
 
-      computerTurn(false, modeKey);
+      if (playerOne.isAllShipSunk()) return 'allSunk';
+      if (computerTurn(false, modeKey, computerTurnCb)) return 'allSunk';
     } else if (stack[0]) {
       if (stack[0].length === 0) stack.shift();
     }
   };
 
-  const computerTurn = (predictableCoordinateObj, modeKey = 'randomIndex') => {
+  const computerTurn = (predictableCoordinateObj, modeKey = 'randomIndex', computerTurnCb) => {
     let coordinateObj = predictableCoordinateObj;
 
     if (stack.length > 0) {
@@ -89,42 +98,21 @@ export default function Player(playerOne, playerTwo) {
 
       coordinateObj = { coordinate, coordinateIndex };
     }
-    computerSendAttack(coordinateObj, modeKey);
+    return computerSendAttack(coordinateObj, modeKey, computerTurnCb);
   };
 
   const humanTurn = (coordinate) => {
     return playerTwo.receiveAttack(coordinate);
   };
 
-  const isBetweenHumanAndComputer = (coordinate, modeKey) => {
-    const attackState = humanTurn(coordinate);
-    if (attackState === 'miss') computerTurn(false, modeKey);
-    // false argument pass through `computerTurn` is used for testing the return of 'adjacentCoordinate'
-  };
-
-  const isBetweenHuman = (coordinate, id) => {
-    if (!isPlayerTurn(id)) return;
-
-    const attackState = getCurrentBoardToAttack().receiveAttack(coordinate);
-
-    if (attackState === 'miss') {
-      switchTurn();
-      switchBoard();
-    }
-  };
-
-  const isPlayerTurn = (id) => getCurrentPlayerID() === id;
-
-  const play = (coordinate, id, modeKey) => {
-    if (playerTwo.getID() === 'computer') {
-      return isBetweenHumanAndComputer(coordinate, modeKey);
-    } else {
-      return isBetweenHuman(coordinate, id);
-    }
-  };
-
   return {
+    humanTurn,
+    computerTurn,
+    switchPlayerName,
     switchBoard,
-    play,
+    switchBoardID,
+    getCurrentBoardToAttack,
+    getCurPlayerName,
+    getCurrentBoardID,
   };
 }

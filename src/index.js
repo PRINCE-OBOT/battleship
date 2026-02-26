@@ -24,20 +24,15 @@ const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
 
 const selectShipDim = 240;
 
-let isGameBetweenHuman = false;
-
 const playerOne = {
-  name: 'Player 1',
   board: GameBoard(crypto.randomUUID()),
 };
 
 const playerTwo = {
-  name: 'Player 2',
   board: GameBoard(crypto.randomUUID()),
 };
 
 const computer = {
-  name: 'Grok',
   board: GameBoard('computer'),
 };
 
@@ -127,33 +122,6 @@ function ShipSelection() {
 
 const shipSel = ShipSelection();
 
-function setShip(e) {
-  const cell = e.target;
-  const ship = e.target;
-  const boardElem = cell.closest('[data-player-board]');
-  const board = boardElem.dataset.playerBoard === 'one' ? playerOne.board : playerTwo.board;
-  let coordinate = cell.dataset.coordinate;
-
-  if (ship.dataset.len) {
-    coordinate = ship.closest('[data-coordinate]').getAttribute('data-coordinate');
-    if (board.switchShipAxis(coordinate)) {
-      ship.classList.toggle('rotate');
-    }
-  } else if (coordinate) {
-    const shipElem = shipSel.getSelectedShip();
-    if (!shipElem) return;
-    const id = shipElem.id;
-    const len = +shipElem.getAttribute('data-len');
-
-    const isShipSet = board.setShip({ id, len }, coordinate);
-    if (isShipSet) {
-      const width = getComputedStyle(playerOneBoard).width;
-      shipElem.style.minWidth = `${(+width.replace(/[a-z]/gi, '') / 10) * len}px`;
-      cell.append(shipElem);
-    }
-  }
-}
-
 function setComputerShip() {
   computer.board.setShipDynamically();
 
@@ -169,122 +137,209 @@ function setComputerShip() {
   });
 }
 
-const player2Tool = [formPlayerTwoName, playerTwoSelectShipBoard];
-
-function togglePlayer2Name() {
+function togglePlayer2SelectShipBoard() {
   const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
 
   if (inpCheckPlayer.id === 'computer') {
-    player2Tool.forEach((tool) => tool.classList.add('hide'));
-  } else player2Tool.forEach((tool) => tool.classList.remove('hide'));
+    playerTwoSelectShipBoard.classList.add('hide');
+  } else playerTwoSelectShipBoard.classList.remove('hide');
 }
 
 const removeShip = (cellElem) => {
   const ship = cellElem.querySelector('[data-len]');
-  const attackCellStatus = cellElem.querySelector('.attackCellStatus');
   if (ship) ship.remove();
-  if (attackCellStatus) attackCellStatus.remove();
 };
 
-const resetPlayerTwoBoard = () => {
+const removeAttackCell = (cellElem) => {
+  const attackCellStatus = cellElem.querySelector('[data-hit-status]');
+  if (attackCellStatus) {
+    attackCellStatus.remove();
+  }
+};
+
+const resetSelectShipBoardTwo = () => {
   [...[...selectShipBoards][1].children].forEach(removeShip);
   appendShipTemplateOnSelectBoard(playerTwoSelectShipBoard, playerTwoID);
+};
+
+const resetSelectShipBoardOne = () => {
+  [...[...selectShipBoards][0].children].forEach(removeShip);
+  appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
+};
+
+const removeAttackCellMark = () => {
+  playerBoards.forEach((board) => {
+    [...board.children].forEach(removeAttackCell);
+  });
+};
+
+const removeShipFromPlayerOneBoard = () => {
+  [...playerOneBoard.children].forEach(removeShip);
+};
+
+const removeShipOnFromPlayerTwoBoard = () => {
   [...playerTwoBoard.children].forEach(removeShip);
 };
 
-function handleResetPlayerTwoBoard(e) {
+function handleResetSelectShipBoardTwo(e) {
   const checkPlayer = e.target.dataset.inpCheckPlayer;
 
   if (!checkPlayer) return;
 
   if (checkPlayer === 'computer') {
-    resetPlayerTwoBoard();
+    resetSelectShipBoardTwo();
+    [...playerTwoBoard.children].forEach(removeShip);
   }
-  togglePlayer2Name();
+  togglePlayer2SelectShipBoard();
 }
 
-const resetPlayerBoard = () => {
-  [...playerOneBoard.children].forEach(removeShip);
-  [...playerTwoBoard.children].forEach(removeShip);
+const filterCellWithShip = (cellElem) => {
+  return cellElem.querySelector('[data-len]');
+};
+
+const makePointerNone = (cellElem) => {
+  cellElem.querySelector('[data-len]').classList.add('pointerEventNone');
 };
 
 function Game() {
-  let player, gameStart, winner;
+  let isBtw, player, winner, gameStart;
+
+  const humanAndComputer = {
+    attackShip(cell, coordinate) {
+      let attackState = player.humanTurn(coordinate);
+
+      if (!attackState) return;
+
+      markHitCell(cell, attackState);
+
+      if (computer.board.isAllShipSunk()) {
+        winner = playerOne.name;
+        return;
+      }
+
+      if (attackState === 'miss') {
+        const isAllShipSunk = player.computerTurn(false, 'randomIndex', computerTurnCb);
+        if (isAllShipSunk === 'allSunk') {
+          winner = computer.name;
+          return;
+        }
+      }
+    },
+
+    playAgain() {
+      computer.board.playAgain();
+    },
+
+    reset() {
+      computer.board.reset();
+    },
+  };
+
+  const humanAndHuman = {
+    attackShip(cell, coordinate) {
+      const boardElemID = cell.closest('[data-player-board]').id;
+      const boardID = player.getCurrentBoardID();
+
+      if (boardElemID !== boardID) return;
+
+      const currentBoardAttack = player.getCurrentBoardToAttack();
+      const attackState = currentBoardAttack.receiveAttack(coordinate);
+
+      if (!attackState) return;
+
+      markHitCell(cell, attackState);
+
+      if (attackState === 'miss') {
+        player.switchBoardID();
+        player.switchBoard();
+        player.switchPlayerName();
+      } else {
+        if (currentBoardAttack.isAllShipSunk()) {
+          winner = player.getCurPlayerName();
+        }
+      }
+    },
+
+    playAgain() {
+      playerTwo.board.playAgain();
+    },
+
+    reset() {
+      playerTwo.board.reset();
+      removeShipOnFromPlayerTwoBoard();
+      resetSelectShipBoardTwo();
+    },
+  };
 
   function start() {
-    if (gameStart) return;
+    // if (gameStart) return;
 
     const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
-    isGameBetweenHuman = inpCheckPlayer.id === 'computer' ? false : true;
 
-    if (!isGameBetweenHuman) {
+    const playerInfo = {
+      playerOne: playerOne.board,
+      playerOneName: 'Player 1',
+    };
+
+    if (inpCheckPlayer.id === 'computer') {
+      isBtw = humanAndComputer;
+      playerInfo.playerTwo = computer.board;
+      playerInfo.playerTwoName = 'Grok';
+
       setComputerShip();
-      player = Player(playerOne.board, computer.board);
     } else {
-      player = Player(playerOne.board, playerTwo.board);
+      isBtw = humanAndHuman;
+
+      playerInfo.playerTwo = playerTwo.board;
+      playerInfo.playerTwoName = 'Player 2';
+      [...playerTwoBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
     }
 
-    if (player1Name.value.trim() !== '') playerOne.name = player1Name.value;
-    if (player2Name.value.trim() !== '') playerTwo.name = player1Name.value;
+    if (player1Name.value.trim() !== '') playerInfo.playerOneName = player1Name.value;
+    if (player2Name.value.trim() !== '') playerInfo.playerTwoName = player2Name.value;
 
+    player = Player(playerInfo);
+
+    [...playerOneBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
+    winnerName.textContent = 'Game Ongoing';
     gameStart = true;
   }
-
-  const unMarkHitCell = () => {
-    playerBoards.forEach((board) => {
-      [...board.children].forEach((cell) => cell.classList.remove('attackCell'));
-    });
-  };
 
   const newRound = () => {
     winner = false;
     winnerName.innerHTML = '🎯';
-    unMarkHitCell();
+    removeAttackCellMark();
   };
 
   function playAgain() {
+    if (!isBtw) return;
+
     gameStart = true;
 
-    if (isGameBetweenHuman) {
-      playerTwo.board.playAgain();
-    } else {
-      computer.board.playAgain();
-    }
+    isBtw.playAgain();
     playerOne.board.playAgain();
+    removeAttackCellMark();
     newRound();
   }
 
   function reset() {
-    if (isGameBetweenHuman) {
-      playerTwo.board.reset();
-      resetPlayerTwoBoard();
-    } else {
-      computer.board.reset();
-    }
+    if (!isBtw) return;
+
+    isBtw.reset();
     playerOne.board.reset();
 
-    resetPlayerBoard();
-
-    [...[...selectShipBoards][0].children].forEach(removeShip);
-
-    appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
+    removeAttackCellMark();
+    removeShipFromPlayerOneBoard();
+    resetSelectShipBoardOne();
     newRound();
   }
 
-  const markHitCell = (board, boardElem) => {
-    board
-      .getBoard()
-      .filter((cell) => cell.isCellHit())
-      .forEach((cell) => {
-        const coordinate = cell.getCoordinate();
-        const cellElem = boardElem.querySelector(`[data-coordinate='${coordinate}']`);
-
-        const attackCellStatus = document.createElement('div');
-
-        attackCellStatus.classList.add('attackCellStatus');
-        attackCellStatus.innerHTML = cell.getShip() ? '💥' : '❌';
-        cellElem.append(attackCellStatus);
-      });
+  const markHitCell = (cellElem, attackState) => {
+    const attackCellStatus = document.createElement('div');
+    attackCellStatus.classList.add('attackCellStatus');
+    attackCellStatus.setAttribute('data-hit-status', '');
+    attackCellStatus.innerHTML = attackState === 'hit' ? '💥' : '❌';
+    cellElem.append(attackCellStatus);
   };
 
   const displayWinnerName = (winner) => {
@@ -294,39 +349,51 @@ function Game() {
     }
   };
 
-  function attackShip(e) {
-    if (!player || !gameStart) return;
+  const computerTurnCb = (coordinate, attackState) => {
+    const cell = playerOneBoard.querySelector(`[data-coordinate="${coordinate}"]`);
+    markHitCell(cell, attackState);
+  };
 
-    const cell = e.target;
-    const id = cell.closest('[data-player-board]').id;
+  function attackShip(e) {
+    if (!gameStart || !isBtw) return;
+
+    let cell = e.target;
     const coordinate = cell.dataset.coordinate;
 
-    player.play(coordinate, id);
-
-    markHitCell(playerOne.board, playerOneBoard);
-
-    if (!isGameBetweenHuman) {
-      if (computer.board.isAllShipSunk()) {
-        winner = playerOne.name;
-      } else if (playerOne.board.isAllShipSunk()) {
-        winner = computer.name;
-      }
-
-      markHitCell(computer.board, playerTwoBoard);
-    } else {
-      markHitCell(playerTwo.board, playerTwoBoard);
-
-      if (playerTwo.board.isAllShipSunk()) {
-        winner = playerOne.name;
-      } else if (playerOne.board.isAllShipSunk()) {
-        winner = playerTwo.name;
-      }
-    }
-
+    isBtw.attackShip(cell, coordinate);
     displayWinnerName(winner);
   }
 
-  return { start, playAgain, reset, attackShip };
+  function setShip(e) {
+    if (gameStart) return;
+
+    const cell = e.target;
+    const ship = e.target;
+    const boardElem = cell.closest('[data-player-board]');
+    const board = boardElem.dataset.playerBoard === 'one' ? playerOne.board : playerTwo.board;
+    let coordinate = cell.dataset.coordinate;
+
+    if (ship.dataset.len) {
+      coordinate = ship.closest('[data-coordinate]').getAttribute('data-coordinate');
+      if (board.switchShipAxis(coordinate)) {
+        ship.classList.toggle('rotate');
+      }
+    } else if (coordinate) {
+      const shipElem = shipSel.getSelectedShip();
+      if (!shipElem) return;
+      const id = shipElem.id;
+      const len = +shipElem.getAttribute('data-len');
+
+      const isShipSet = board.setShip({ id, len }, coordinate);
+      if (isShipSet) {
+        const width = getComputedStyle(playerOneBoard).width;
+        shipElem.style.minWidth = `${(+width.replace(/[a-z]/gi, '') / 10) * len}px`;
+        cell.append(shipElem);
+      }
+    }
+  }
+
+  return { setShip, start, playAgain, reset, attackShip };
 }
 
 const game = Game();
@@ -335,9 +402,9 @@ appendShipTemplateOnSelectBoard(playerOneSelectShipBoard, playerOneID);
 appendShipTemplateOnSelectBoard(playerTwoSelectShipBoard, playerTwoID);
 
 appendCellToBoard();
-togglePlayer2Name();
+togglePlayer2SelectShipBoard();
 
-select_player2_or_computer.addEventListener('change', handleResetPlayerTwoBoard);
+select_player2_or_computer.addEventListener('change', handleResetSelectShipBoardTwo);
 
 play.addEventListener('click', game.start);
 reset.addEventListener('click', game.reset);
@@ -346,10 +413,10 @@ playAgain.addEventListener('click', game.playAgain);
 playerOneSelectShipBoard.addEventListener('click', shipSel.selectShip);
 playerTwoSelectShipBoard.addEventListener('click', shipSel.selectShip);
 
-playerOneBoard.addEventListener('click', setShip);
-playerTwoBoard.addEventListener('click', setShip);
+playerOneBoard.addEventListener('click', game.setShip);
+playerTwoBoard.addEventListener('click', game.setShip);
 
-playerTwoBoard.addEventListener('click', game.attackShip);
+playerOneBoard.addEventListener('click', game.attackShip);
 playerTwoBoard.addEventListener('click', game.attackShip);
 
 document.addEventListener('click', () => {

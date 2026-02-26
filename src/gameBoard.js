@@ -37,6 +37,8 @@ export default function GameBoard(id) {
   const xAxis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   const cellInOrderOfHit = [];
 
+  let hitCoordinate;
+
   for (let i = 0; i < yAxis.length; i++) {
     for (let j = 0; j < xAxis.length; j++) {
       board.push(Cell(`${yAxis[i]}${xAxis[j]}`));
@@ -116,6 +118,8 @@ export default function GameBoard(id) {
       count++;
       index++;
     }
+
+    hitCoordinate = coordinate;
     return true;
   };
 
@@ -326,6 +330,8 @@ export default function GameBoard(id) {
     });
   };
 
+  const getHitCoordinate = () => hitCoordinate;
+
   return {
     setShip,
     getShip,
@@ -337,6 +343,7 @@ export default function GameBoard(id) {
     getCoordinate,
     getBoard,
     getAllCoordinate,
+    getHitCoordinate,
     getCoordinateIndex,
     getCellInOrderOfHit,
     getValidAdjacentIndex,
