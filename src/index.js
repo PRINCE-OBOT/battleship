@@ -102,6 +102,7 @@ const appendShipTemplateOnSelectBoard = (selectBoard, playerID) => {
     const cell = [...selectBoard.children][shipTemplate.ind];
     img.classList.add('shipImg');
     img.setAttribute('data-len', shipTemplate.len);
+    img.setAttribute('data-img', 'ship');
     img.style.minWidth = `${(selectShipDim / 10) * shipTemplate.len}px`;
     img.src = shipTemplate.ship;
     img.id = playerID;
@@ -122,15 +123,27 @@ const appendCellToBoard = () => {
 };
 
 function toggleShipDisplay(board) {
-  board.querySelectorAll('[data-len]').forEach((ship) => ship.classList.toggle('visibilityHidden'));
+  board.querySelectorAll('[data-img]').forEach((ship) => ship.classList.toggle('visibilityHidden'));
 }
 
 function handleTogglePlayerOneShip() {
+  if (!playerOne.board.isAllShipSet()) {
+    togglePlayerOneMsg(`Set all your Ship first`);
+    return;
+  }
   toggleShipDisplay(playerOneBoard);
 }
 
 function handleTogglePlayerTwoShip() {
-  toggleShipDisplay(playerTwoBoard);
+  const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
+
+  if (inpCheckPlayer.id === 'computer') {
+    togglePlayerTwoMsg(`Feature N/A for Computer`);
+  } else if (!playerTwo.board.isAllShipSet()) {
+    togglePlayerTwoMsg(`Set all your Ship first`);
+  } else {
+    toggleShipDisplay(playerTwoBoard);
+  }
 }
 
 function ShipSelection() {
@@ -240,7 +253,7 @@ const makeInpReadOnly = () => {
   [player1Name, player2Name].forEach((name) => (name.readOnly = true));
 };
 
-const makeReadOnlyFromInp = () => {
+const removeReadOnlyFromInp = () => {
   [player1Name, player2Name].forEach((name) => (name.readOnly = false));
 };
 
@@ -359,12 +372,13 @@ function Game() {
     makeInpReadOnly();
     const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
 
+    playerInfo.playerOneName = player1Name.value.trim() !== '' ? player1Name.value : 'Player 1';
+    playerInfo.playerTwoName = player2Name.value.trim() !== '' ? player2Name.value : 'Player 2';
+
     if (inpCheckPlayer.id === 'computer') {
       isBtw = humanAndComputer;
-      playerInfo.playerTwo = computer.board;
-      playerInfo.playerTwoName = 'Grok';
 
-      if (player1Name.value.trim() !== '') playerInfo.playerOneName = player1Name.value;
+      playerInfo.playerTwo = computer.board;
 
       if (!playerOne.board.isAllShipSet()) {
         togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
@@ -376,7 +390,6 @@ function Game() {
       isBtw = humanAndHuman;
 
       playerInfo.playerTwo = playerTwo.board;
-      playerInfo.playerTwoName = 'Player 2';
 
       if (!playerOne.board.isAllShipSet()) {
         togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
@@ -388,8 +401,6 @@ function Game() {
 
       [...playerTwoBoard.children].filter(filterCellWithShip).forEach(makePointerNone);
     }
-
-    if (player2Name.value.trim() !== '') playerInfo.playerTwoName = player2Name.value;
 
     player = Player(playerInfo);
 
@@ -426,7 +437,7 @@ function Game() {
     removeAttackCellMark();
     removeShipFromPlayerOneBoard();
     resetSelectShipBoardOne();
-    makeReadOnlyFromInp();
+    removeReadOnlyFromInp();
     resetBoard();
   }
 
