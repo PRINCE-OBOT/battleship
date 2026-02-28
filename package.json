@@ -15,7 +15,7 @@
     "start": "webpack serve --config webpack.dev.js",
     "build": "webpack serve --config webpack.prod.js",
     "dev": "webpack --config webpack.dev.js",
-    "prod": "webpack --config webpack.dev.js",
+    "prod": "webpack --config webpack.prod.js",
     "prettier": "prettier --write ./src/",
     "prettier-global": "prettier --write .",
     "lint": "eslint ./src/",
