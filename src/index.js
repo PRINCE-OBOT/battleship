@@ -30,7 +30,6 @@ const playerTwoSelectShipBoard = document.querySelector('[data-select-ship-board
 const selectShipBoards = document.querySelectorAll('[data-select-ship-board]');
 const pirateShipImg = document.createElement('img');
 const sailingShipImg = document.createElement('img');
-const bgPatternImg = document.createElement('img');
 
 const selectShipDim = 240;
 
@@ -429,7 +428,10 @@ function Game() {
   }
 
   function reset() {
-    if (!isBtw) return;
+    if (!isBtw) {
+      generalMsg.textContent = 'Not Played';
+      return;
+    }
 
     isBtw.reset();
     playerOne.board.reset();

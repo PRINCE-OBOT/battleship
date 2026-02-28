@@ -136,7 +136,7 @@ export default function GameBoard(id) {
     ship.switchAxis();
     const axis = ship.getAxis();
 
-    if (!isBottomCoordinateValid(coordinateIndex + shipLen * 10)) return;
+    if (!isBottomCoordinateValid(coordinateIndex + (shipLen - 1) * 10)) return;
 
     let count = 0;
     let oldIndex = coordinateIndex;
