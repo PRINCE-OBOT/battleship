@@ -347,8 +347,7 @@ main {
 .winner-name {
   max-width: 100px;
   text-wrap: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  overflow-x: scroll;
   text-align: center;
   padding: var(--sz-sm);
   color: var(--black);
@@ -380,6 +379,9 @@ main {
   background-color: var(--transparent-black-lg);
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
 /* 
 Visualize computer ship
 

@@ -366,7 +366,10 @@ function Game() {
   };
 
   function start() {
-    if (gameStart) return;
+    if (gameStart) {
+      setPlayerTurnMsg('Ongoing Game');
+      return;
+    }
 
     makeInpReadOnly();
     const inpCheckPlayer = document.querySelector('[data-inp-check-player]:checked');
@@ -381,7 +384,7 @@ function Game() {
 
       if (!playerOne.board.isAllShipSet()) {
         togglePlayerOneMsg(`${playerInfo.playerOneName} set all your Ship`);
-        return;
+        // return;
       }
 
       setComputerShip();
@@ -408,9 +411,13 @@ function Game() {
     gameStart = true;
   }
 
-  const resetBoard = () => {
-    winner = false;
+  const hardReset = () => {
     gameStart = false;
+    softReset();
+  };
+
+  const softReset = () => {
+    winner = false;
     generalMsg.innerHTML = '🎯';
     removeAttackCellMark();
   };
@@ -418,13 +425,11 @@ function Game() {
   function playAgain() {
     if (!isBtw) return;
 
-    gameStart = true;
-
     isBtw.playAgain();
     playerOne.board.playAgain();
     removeAttackCellMark();
     generalMsg.textContent = 'Game Ongoing';
-    resetBoard();
+    softReset();
   }
 
   function reset() {
@@ -440,7 +445,7 @@ function Game() {
     removeShipFromPlayerOneBoard();
     resetSelectShipBoardOne();
     removeReadOnlyFromInp();
-    resetBoard();
+    hardReset();
   }
 
   const markHitCell = (cellElem, attackState) => {
